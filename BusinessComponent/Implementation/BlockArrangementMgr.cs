@@ -166,7 +166,7 @@ namespace Eoba.Shipyard.ArrangementSimulator.BusinessComponent.Implementation
         /// <param name="ArrangementFinishDate">배치 종료일</param>
         /// <returns>블록 배치 결과</returns>
         /// 최초 작성 : 주수헌, 2015년 9월 20일
-        /// 수정 일자 : 유상현, 2016년 5월 15일
+        /// 수정 일자 : 유상현, 2020년 5월 15일
         ArrangementResultWithDateDTO IBlockArrangement.RunBLFAlgorithm(List<BlockDTO> inputBlockList, List<Int32[,]> ArrangementMatrixList, List<WorkshopDTO> WorkShopInfo, DateTime ArrangementStartDate, DateTime ArrangementFinishDate, ToolStripProgressBar ProgressBar, ToolStripStatusLabel ProgressLabel)
         {
             ArrangementResultWithDateDTO ResultInfo;

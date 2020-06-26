@@ -143,12 +143,6 @@
     <Compile Include="frmMain.Designer.cs">
       <DependentUpon>frmMain.cs</DependentUpon>
     </Compile>
-    <Compile Include="frmQRCodeRecognition.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmQRCodeRecognition.Designer.cs">
-      <DependentUpon>frmQRCodeRecognition.cs</DependentUpon>
-    </Compile>
     <Compile Include="frmResultsViewer.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -168,9 +162,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="frmQRCodeRecognition.resx">
-      <DependentUpon>frmQRCodeRecognition.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmResultsViewer.resx">
       <DependentUpon>frmResultsViewer.cs</DependentUpon>

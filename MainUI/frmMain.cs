@@ -127,7 +127,38 @@ namespace Eoba.Shipyard.ArrangementSimulator.MainUI
                 for (int i = 1; i < input.Count; i++)
                 {
                     mWorkshopInfoList.Add(new WorkshopDTO(Convert.ToInt16(input[i][0]), input[i][1], Convert.ToDouble(input[i][2]) / UnitGridLength, Convert.ToDouble(input[i][3]) / UnitGridLength, Convert.ToInt32(input[i][4])));
-                    mWorkshopInfoList[mWorkshopInfoList.Count - 1].RoadSide = input[i][5];
+                    mWorkshopInfoList[mWorkshopInfoList.Count - 1].RowLocation = Convert.ToDouble(input[i][5]) / UnitGridLength;
+                    mWorkshopInfoList[mWorkshopInfoList.Count - 1].ColumnLcoation = Convert.ToDouble(input[i][6]) / UnitGridLength;
+
+                    if (input[i][7] != "")
+                    {
+                        string[] temp = input[i][7].Split('-');
+                        double[] tempDouble = new double[2];
+                        for (int j = 0; j < temp.Length; j++) tempDouble[j] = Convert.ToDouble(temp[j]);
+                        mWorkshopInfoList[mWorkshopInfoList.Count - 1].UpperRoadside = tempDouble;
+                    }
+                    if (input[i][8] != "")
+                    {
+                        string[] temp = input[i][8].Split('-');
+                        double[] tempDouble = new double[2];
+                        for (int j = 0; j < temp.Length; j++) tempDouble[j] = Convert.ToDouble(temp[j]);
+                        mWorkshopInfoList[mWorkshopInfoList.Count - 1].BottomRoadside = tempDouble;
+                    }
+                    if (input[i][9] != "")
+                    {
+                        string[] temp = input[i][9].Split('-');
+                        double[] tempDouble = new double[2];
+                        for (int j = 0; j < temp.Length; j++) tempDouble[j] = Convert.ToDouble(temp[j]);
+                        mWorkshopInfoList[mWorkshopInfoList.Count - 1].LeftRoadside = tempDouble;
+                    }
+                    if (input[i][10] != "")
+                    {
+                        string[] temp = input[i][10].Split('-');
+                        double[] tempDouble = new double[2];
+                        for (int j = 0; j < temp.Length; j++) tempDouble[j] = Convert.ToDouble(temp[j]);
+                        mWorkshopInfoList[mWorkshopInfoList.Count - 1].RightRoadside = tempDouble;
+                    }
+
                 }
 
                 //그리드에 입력 결과 출력

@@ -18,6 +18,14 @@ namespace Eoba.Shipyard.ArrangementSimulator.DataTransferObject
         public double ColumnCount { get; set; }
         public int NumOfAddress { get; set; }
 
+        public double RowLocation { get; set; }
+        public double ColumnLcoation { get; set; }
+        public double[] UpperRoadside { get; set; }
+        public double[] BottomRoadside { get; set; }
+        public double[] LeftRoadside { get; set; }
+        public double[] RightRoadside { get; set; }
+
+
         public double[] AddressColumnLocation { get; set; }
         public string RoadSide { get; set; }
 
@@ -93,6 +101,28 @@ namespace Eoba.Shipyard.ArrangementSimulator.DataTransferObject
             }
         }
 
+        public WorkshopDTO(int _index, string _name, double _rowCount, double _colCount, int _numOfAddress, double _RowLocation, double _ColumnLocation, double[] _UpperRoadside, double[] _BottomRoadside, double[] _LeftRoadside, double[] _RightRoadside)
+        {
+            Index = _index;
+            Name = _name;
+            RowCount = _rowCount;
+            ColumnCount = _colCount;
+            NumOfAddress = _numOfAddress;
+            RowLocation = _RowLocation;
+            ColumnLcoation = _ColumnLocation;
+            UpperRoadside = _UpperRoadside;
+            BottomRoadside = _BottomRoadside;
+            LeftRoadside = _LeftRoadside;
+            RightRoadside = _RightRoadside;
+
+            AddressColumnLocation = new double[NumOfAddress];
+            //지번 자동 할당
+            for (int i = 0; i < NumOfAddress; i++)
+            {
+                AddressColumnLocation[i] = (ColumnCount / NumOfAddress) * Convert.ToDouble(i);
+            }
+        }
+
         public WorkshopDTO()
         {
         }
@@ -102,6 +132,13 @@ namespace Eoba.Shipyard.ArrangementSimulator.DataTransferObject
         {
             WorkshopDTO tempWorkshopDTO =  new WorkshopDTO(Index, Name, RowCount, ColumnCount, NumOfAddress);
             if (ArrangementMatrixInfoList.Count != 0) tempWorkshopDTO.ArrangementMatrixInfoList = ArrangementMatrixInfoList;
+            tempWorkshopDTO.RowLocation = RowLocation;
+            tempWorkshopDTO.ColumnLcoation = ColumnLcoation;
+            tempWorkshopDTO.UpperRoadside = UpperRoadside;
+            tempWorkshopDTO.BottomRoadside = BottomRoadside;
+            tempWorkshopDTO.LeftRoadside = LeftRoadside;
+            tempWorkshopDTO.RightRoadside = RightRoadside;
+
             return tempWorkshopDTO;
         }
         
