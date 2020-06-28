@@ -235,7 +235,7 @@ namespace Eoba.Shipyard.ArrangementSimulator.ResultsViewer
             {
                 foreach (ArrangementMatrixInfoDTO Object in Workshop.ArrangementMatrixInfoList)
                 {
-                    main3DGroup.Children.Add(CreateRectModel(Math.Ceiling(Object.RowCount), Math.Ceiling(Object.ColumnCount), 0, new Point3D(ws[Workshop.Index][0] + Math.Ceiling(Object.RowLocation), ws[Workshop.Index][1] + Math.Ceiling(Object.ColumnLocation), 0), Colors.LightCyan, 3, new string[4] { "NotAvailable", "", "", "" }));
+                    main3DGroup.Children.Add(CreateRectModel(Math.Ceiling(Object.RowCount), Math.Ceiling(Object.ColumnCount), 0, new Point3D(ws[Workshop.Index][0] + Math.Ceiling(Object.RowLocation), ws[Workshop.Index][1] + Math.Ceiling(Object.ColumnLocation), 0), Colors.LightCyan, 3, new string[4] { "NA", "", "", "" }));
                 }
             }
 
@@ -294,7 +294,9 @@ namespace Eoba.Shipyard.ArrangementSimulator.ResultsViewer
                 if (minSize > 3.0) minSize = 3.0;
 
                 main3DGroup.Children.Add(CreateRectModel(tempRow, tempCol, 0, new Point3D(ws[Block.CurrentLocatedWorkshopIndex][0] + Math.Ceiling(Block.LocatedRow), ws[Block.CurrentLocatedWorkshopIndex][1] + Math.Ceiling(Block.LocatedColumn), 0), blockColor));
-                main3DGroup.Children.Add(CreateRectModel(tempRow-0.8, tempCol-0.8, 0, new Point3D(ws[Block.CurrentLocatedWorkshopIndex][0] + Math.Ceiling(Block.LocatedRow)+0.4, ws[Block.CurrentLocatedWorkshopIndex][1] + Math.Ceiling(Block.LocatedColumn)+0.4, 0), Colors.Silver, minSize, arrprintedstring));
+                //우선순위 블록은 노란색으로 채우기
+                if(Block.IsPrior == true) main3DGroup.Children.Add(CreateRectModel(tempRow - 0.8, tempCol - 0.8, 0, new Point3D(ws[Block.CurrentLocatedWorkshopIndex][0] + Math.Ceiling(Block.LocatedRow) + 0.4, ws[Block.CurrentLocatedWorkshopIndex][1] + Math.Ceiling(Block.LocatedColumn) + 0.4, 0), Colors.Yellow, minSize, arrprintedstring));
+                else main3DGroup.Children.Add(CreateRectModel(tempRow-0.8, tempCol-0.8, 0, new Point3D(ws[Block.CurrentLocatedWorkshopIndex][0] + Math.Ceiling(Block.LocatedRow)+0.4, ws[Block.CurrentLocatedWorkshopIndex][1] + Math.Ceiling(Block.LocatedColumn)+0.4, 0), Colors.Silver, minSize, arrprintedstring));
             }
 
 

@@ -87,6 +87,10 @@ namespace Eoba.Shipyard.ArrangementSimulator.DataTransferObject
         public bool IsRoadSide { get; set; }
         public bool IsConditionSatisfied { get; set; }
         public bool IsFinished { get; set; }
+        public bool IsPrior { get; set; }
+        
+        public int SearchDirection { get; set; }
+        public int ArrangementDirection { get; set; }
         
 
         public BlockDTO(int _index, string _project, string _name, double _rowCount, double _colCount, double _uppCount, double _botCount, double _lefCount, double _rigCount, List<int> _preferWorkShopIndexList, List<int> _preferAddressIndexList, double _leadtime, DateTime _ImportDate, DateTime _ExportDate, DateTime _actualImporteDate, DateTime _actualExportDate)
@@ -123,7 +127,9 @@ namespace Eoba.Shipyard.ArrangementSimulator.DataTransferObject
             IsRoadSide = false;
             IsConditionSatisfied = false;
         }
-        public BlockDTO(int _index, string _project, string _name, double _rowCount, double _colCount, double _uppCount, double _botCount, double _lefCount, double _rigCount, List<int> _preferWorkShopIndexList, List<int> _preferAddressIndexList, double _leadtime, DateTime _ImportDate, DateTime _ExportDate, DateTime _actualImporteDate, DateTime _actualExportDate, bool _IsRoadSide)
+        
+        //최종
+        public BlockDTO(int _index, string _project, string _name, double _rowCount, double _colCount, double _uppCount, double _botCount, double _lefCount, double _rigCount, List<int> _preferWorkShopIndexList, List<int> _preferAddressIndexList, double _leadtime, DateTime _ImportDate, DateTime _ExportDate, DateTime _actualImporteDate, DateTime _actualExportDate, bool _IsRoadSide, bool _IsPrior, int _SearchDirection, int _ArrangementDirection)
         {
             Index = _index;
             Project = _project;
@@ -156,41 +162,44 @@ namespace Eoba.Shipyard.ArrangementSimulator.DataTransferObject
             DelayedTime = 0;
             IsRoadSide = _IsRoadSide;
             IsConditionSatisfied = _IsRoadSide;
+            IsPrior = _IsPrior;
+            SearchDirection = _SearchDirection;
+            ArrangementDirection = _ArrangementDirection;
         }
-        public BlockDTO(int _index, string _project, string _name, double _rowCount, double _colCount, double _uppCount, double _botCount, double _lefCount, double _rigCount, List<int> _preferWorkShopIndexList, List<int> _preferAddressIndexList, double _leadtime, DateTime _ImportDate, DateTime _ExportDate, DateTime _actualImporteDate, DateTime _actualExportDate, double _LocatedRow, double _LocatedColumn, bool _IsLocated)
-        {
-            Index = _index;
-            Project = _project;
-            Name = _name;
-            RowCount = _rowCount;
-            ColumnCount = _colCount;
-            UpperSideCount = _uppCount;
-            BottomSideCount = _botCount;
-            LeftSideCount = _lefCount;
-            RightSideCount = _rigCount;
-            Leadtime = _leadtime;
-            InitialImportDate = _ImportDate;
-            InitialExportDate = _ExportDate;
-            ImportDate = _ImportDate;
-            ExportDate = _ExportDate;
-            LocatedRow = _LocatedRow;
-            LocatedColumn = _LocatedColumn;
-            CurrentLocatedWorkshopIndex = -1;
-            CurrentLocatedAddressIndex = -1;
-            ActualLocatedWorkshopIndex = -1;
-            ActualLocatedAddressIndex = -1;
-            ActualImportDate = _actualImporteDate;
-            ActualExportDate = _actualExportDate;
+        //public BlockDTO(int _index, string _project, string _name, double _rowCount, double _colCount, double _uppCount, double _botCount, double _lefCount, double _rigCount, List<int> _preferWorkShopIndexList, List<int> _preferAddressIndexList, double _leadtime, DateTime _ImportDate, DateTime _ExportDate, DateTime _actualImporteDate, DateTime _actualExportDate, double _LocatedRow, double _LocatedColumn, bool _IsLocated)
+        //{
+        //    Index = _index;
+        //    Project = _project;
+        //    Name = _name;
+        //    RowCount = _rowCount;
+        //    ColumnCount = _colCount;
+        //    UpperSideCount = _uppCount;
+        //    BottomSideCount = _botCount;
+        //    LeftSideCount = _lefCount;
+        //    RightSideCount = _rigCount;
+        //    Leadtime = _leadtime;
+        //    InitialImportDate = _ImportDate;
+        //    InitialExportDate = _ExportDate;
+        //    ImportDate = _ImportDate;
+        //    ExportDate = _ExportDate;
+        //    LocatedRow = _LocatedRow;
+        //    LocatedColumn = _LocatedColumn;
+        //    CurrentLocatedWorkshopIndex = -1;
+        //    CurrentLocatedAddressIndex = -1;
+        //    ActualLocatedWorkshopIndex = -1;
+        //    ActualLocatedAddressIndex = -1;
+        //    ActualImportDate = _actualImporteDate;
+        //    ActualExportDate = _actualExportDate;
 
-            for (int i = 0; i < _preferWorkShopIndexList.Count; i++) mPreferWorkShopIndexList.Add(_preferWorkShopIndexList[i]);
-            for (int i = 0; i < _preferAddressIndexList.Count; i++) mPreferAddressIndexList.Add(_preferAddressIndexList[i]);
-            IsLocated = _IsLocated;
-            IsFinished = false;
-            IsDelayed = false;
-            DelayedTime = 0;
-            IsRoadSide = false;
-            IsConditionSatisfied = false;
-        }
+        //    for (int i = 0; i < _preferWorkShopIndexList.Count; i++) mPreferWorkShopIndexList.Add(_preferWorkShopIndexList[i]);
+        //    for (int i = 0; i < _preferAddressIndexList.Count; i++) mPreferAddressIndexList.Add(_preferAddressIndexList[i]);
+        //    IsLocated = _IsLocated;
+        //    IsFinished = false;
+        //    IsDelayed = false;
+        //    DelayedTime = 0;
+        //    IsRoadSide = false;
+        //    IsConditionSatisfied = false;
+        //}
         public BlockDTO(int _index, string _project, string _name, double _rowCount, double _colCount, List<int> _preferWorkShopIndexList, List<int> _preferAddressIndexList, double _leadtime, DateTime _ImportDate, DateTime _ExportDate, DateTime _actualImporteDate, DateTime _actualExportDate)
         {
             Index = _index;
@@ -257,12 +266,12 @@ namespace Eoba.Shipyard.ArrangementSimulator.DataTransferObject
 
         public BlockDTO Clone()
         {
-            return new BlockDTO(Index, Project, Name, RowCount, ColumnCount, UpperSideCount, BottomSideCount, LeftSideCount, RightSideCount, PreferWorkShopIndexList, PreferAddressIndexList, Leadtime, ImportDate, ExportDate, ActualImportDate, ActualExportDate, IsRoadSide);
+            return new BlockDTO(Index, Project, Name, RowCount, ColumnCount, UpperSideCount, BottomSideCount, LeftSideCount, RightSideCount, PreferWorkShopIndexList, PreferAddressIndexList, Leadtime, ImportDate, ExportDate, ActualImportDate, ActualExportDate, IsRoadSide, IsPrior, SearchDirection, ArrangementDirection);
         }
 
-        public BlockDTO Clone(int isLocated)
-        {
-            return new BlockDTO(Index, Project, Name, RowCount, ColumnCount, UpperSideCount, BottomSideCount, LeftSideCount, RightSideCount, PreferWorkShopIndexList, PreferAddressIndexList, Leadtime, ImportDate, ExportDate, ActualImportDate, ActualExportDate, LocatedRow, LocatedColumn, IsLocated);
-        }
+        //public BlockDTO Clone(int isLocated)
+        //{
+        //    return new BlockDTO(Index, Project, Name, RowCount, ColumnCount, UpperSideCount, BottomSideCount, LeftSideCount, RightSideCount, PreferWorkShopIndexList, PreferAddressIndexList, Leadtime, ImportDate, ExportDate, ActualImportDate, ActualExportDate, LocatedRow, LocatedColumn, IsLocated);
+        //}
     }
 }

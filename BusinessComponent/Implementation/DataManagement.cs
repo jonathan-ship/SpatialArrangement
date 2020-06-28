@@ -293,10 +293,10 @@ namespace Eoba.Shipyard.ArrangementSimulator.BusinessComponent.Implementation
 
             for (int i = 1; i < _inputStringList.Count; i++)
             {
-                //double tempUpperCount;
-                //double tempBotCount;
-                //double tempLeftCount;
-                //double tempRightCount;
+                double tempUpperCount;
+                double tempBotCount;
+                double tempLeftCount;
+                double tempRightCount;
                 double tempLeadTime;
                 double tempLength;
                 double tempBreadth;
@@ -310,48 +310,50 @@ namespace Eoba.Shipyard.ArrangementSimulator.BusinessComponent.Implementation
                 bool PreferAddress = true;
                 bool IsRoadSide = false;
 
+                int tempSearchDirection;
+                int tempArrangementDirection;
+
                 BlockDTO tempBlockDTO;
 
-                if (Convert.ToDouble(_inputStringList[i][3]) >= Convert.ToDouble(_inputStringList[i][4])) tempLength = Convert.ToDouble(_inputStringList[i][4]);
-                else tempLength = Convert.ToDouble(_inputStringList[i][3]);
+                //블록 크기 입력
+                //if (Convert.ToDouble(_inputStringList[i][3]) >= Convert.ToDouble(_inputStringList[i][4])) tempLength = Convert.ToDouble(_inputStringList[i][4]);
+                tempLength = Convert.ToDouble(_inputStringList[i][3]);
 
-                if (Convert.ToDouble(_inputStringList[i][4]) < Convert.ToDouble(_inputStringList[i][3])) tempBreadth = Convert.ToDouble(_inputStringList[i][3]);
-                else tempBreadth = Convert.ToDouble(_inputStringList[i][4]);
+                //if (Convert.ToDouble(_inputStringList[i][4]) < Convert.ToDouble(_inputStringList[i][3])) tempBreadth = Convert.ToDouble(_inputStringList[i][3]);
+                tempBreadth = Convert.ToDouble(_inputStringList[i][4]);
 
                 tempLength /= _UnitGridLength;
                 tempBreadth /= _UnitGridLength;
 
-                //if (IsWorkAreaInfoConsidered)
-                //{
-                //    if (_inputStringList[i][5] == "") tempUpperCount = 1.0;
-                //    else tempUpperCount = Convert.ToDouble(_inputStringList[i][5]);
+                //상하좌우 작업공간 입력
+                if (_inputStringList[i][11] == "") tempUpperCount = 0.0;
+                else tempUpperCount = Convert.ToDouble(_inputStringList[i][11]);
 
-                //    if (_inputStringList[i][6] == "") tempBotCount = 1.0;
-                //    else tempBotCount = Convert.ToDouble(_inputStringList[i][6]);
+                if (_inputStringList[i][12] == "") tempBotCount = 0.0;
+                else tempBotCount = Convert.ToDouble(_inputStringList[i][12]);
 
-                //    if (_inputStringList[i][7] == "") tempLeftCount = 1.0;
-                //    else tempLeftCount = Convert.ToDouble(_inputStringList[i][7]);
+                if (_inputStringList[i][13] == "") tempLeftCount = 0.0;
+                else tempLeftCount = Convert.ToDouble(_inputStringList[i][13]);
 
-                //    if (_inputStringList[i][8] == "") tempRightCount = 1.0;
-                //    else tempRightCount = Convert.ToDouble(_inputStringList[i][8]);
-                //}
-                //else
-                //{
-                //    tempUpperCount = 0.0;
-                //    tempBotCount = 0.0;
-                //    tempLeftCount = 0.0;
-                //    tempRightCount = 0.0;
-                //}
+                if (_inputStringList[i][14] == "") tempRightCount = 0.0;
+                else tempRightCount = Convert.ToDouble(_inputStringList[i][14]);
 
-                tempLeadTime = 0.0;
+
+                //tempLeadTime = 0.0;
                 //if (_inputStringList[i][9] == "") tempLeadTime = 0.0;
                 //else tempLeadTime = Convert.ToDouble(_inputStringList[i][9]);
 
+
+                //입출고일 입력
                 if (_inputStringList[i][6] == "") tempImportDate = DateTime.Parse("0001-01-01");
                 else tempImportDate = DateTime.Parse(_inputStringList[i][6]);
 
                 if (_inputStringList[i][7] == "") tempExportDate = DateTime.Parse("0001-01-01");
                 else tempExportDate = DateTime.Parse(_inputStringList[i][7]);
+
+                //리드타임 계산
+                TimeSpan ts = tempExportDate - tempImportDate;
+                tempLeadTime = ts.Days;
 
                 //입고일과 출고일이 같은 데이터가 입력된 경우에는 출고일 +1
                 //TimeSpan ts = tempExportDate - tempImportDate;
@@ -359,6 +361,7 @@ namespace Eoba.Shipyard.ArrangementSimulator.BusinessComponent.Implementation
 
                 //if (tempTS == 0) tempExportDate = tempExportDate.AddDays(1);
 
+                //선호작업장, 도로인접 배치 여부 입력
                 if (_inputStringList[i][8] == "")
                 {
                     PreferWorkShop = false;
@@ -370,7 +373,7 @@ namespace Eoba.Shipyard.ArrangementSimulator.BusinessComponent.Implementation
                     IsRoadSide = true;
 
                 }
-                if (_inputStringList[i][9] == "") PreferAddress = false;
+                
 
                 if (PreferWorkShop == false) //선호작업장 값이 없는 경우
                 {
@@ -386,27 +389,36 @@ namespace Eoba.Shipyard.ArrangementSimulator.BusinessComponent.Implementation
                     for (int j = 0; j < totalWorkShop; j++) if(!tempPreferWorkShop.Contains(j)) tempPreferWorkShop.Add(j);
                 }
 
-                if (PreferAddress == false) //선호지번 값이 없는 경우
-                {
-                    //선호지번은 빈 리스트
-                }
-                else//선호지번 값이 있는 경우
-                {
-                    string[] temp = _inputStringList[i][9].Split('-');
-                    for (int j = 0; j < temp.Length; j++) tempPreferAddress.Add(Convert.ToInt32(temp[j]));
-                }
+                // 선호지번 잠시 안씀
+                //if (_inputStringList[i][9] == "") PreferAddress = false;
+                //if (PreferAddress == false) //선호지번 값이 없는 경우
+                //{
+                //    //선호지번은 빈 리스트
+                //}
+                //else//선호지번 값이 있는 경우
+                //{
+                //    string[] temp = _inputStringList[i][9].Split('-');
+                //    for (int j = 0; j < temp.Length; j++) tempPreferAddress.Add(Convert.ToInt32(temp[j]));
+                //}
+
+                //탐색방향 입력
+                if (_inputStringList[i][9] == "") tempSearchDirection = 1;
+                else tempSearchDirection = Convert.ToInt32(_inputStringList[i][9]);
+                //배치방향 입력
+                if (_inputStringList[i][10] == "") tempArrangementDirection = 0;
+                else tempArrangementDirection = Convert.ToInt32(_inputStringList[i][10]);
 
 
                 tempBlockDTO = new BlockDTO(
                         Convert.ToInt16(_inputStringList[i][0]),
                         _inputStringList[i][1],
                         _inputStringList[i][2],
-                        tempLength,
                         tempBreadth,
-                        //tempUpperCount,
-                        //tempBotCount,
-                        //tempLeftCount,
-                        //tempRightCount,
+                        tempLength,
+                        tempUpperCount,
+                        tempBotCount,
+                        tempLeftCount,
+                        tempRightCount,
 
                         tempPreferWorkShop,
                         tempPreferAddress,
@@ -415,7 +427,10 @@ namespace Eoba.Shipyard.ArrangementSimulator.BusinessComponent.Implementation
                         tempExportDate,
                         DateTime.MinValue,
                         DateTime.MinValue,
-                        IsRoadSide);
+                        IsRoadSide,
+                        PreferWorkShop,
+                        tempSearchDirection,
+                        tempArrangementDirection);
 
                 returnList.Add(tempBlockDTO);
                 

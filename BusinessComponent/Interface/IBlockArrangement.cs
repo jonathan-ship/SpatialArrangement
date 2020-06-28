@@ -22,7 +22,8 @@ namespace Eoba.Shipyard.ArrangementSimulator.BusinessComponent.Interface
         DateTime[] CalcEarliestAndLatestDates(List<BlockDTO> _blockInfoList);
         ArrangementResultWithDateDTO RunBLFAlgorithm(List<BlockDTO> inputBlockList, List<Int32[,]> ArrangementMatrixList, List<WorkshopDTO> WorkShopInfo, DateTime ArranegementStartDate, DateTime ArrangementFinishDate, ToolStripProgressBar ProgressBar, ToolStripStatusLabel ProgressLabel);
         ArrangementResultWithDateDTO RunBLFAlgorithmWithAddress(List<BlockDTO> inputBlockList, List<Int32[,]> ArrangementMatrixList, List<WorkshopDTO> WorkShopInfo, DateTime ArranegementStartDate, DateTime ArrangementFinishDate, ToolStripProgressBar ProgressBar, ToolStripStatusLabel ProgressLabel);
-        ArrangementResultWithDateDTO RunBLFAlgorithmWithAddressWithSlack(List<BlockDTO> inputBlockList, List<Int32[,]> ArrangementMatrixList, List<WorkshopDTO> WorkShopInfo, DateTime ArranegementStartDate, DateTime ArrangementFinishDate, ToolStripProgressBar ProgressBar, ToolStripStatusLabel ProgressLabel, int Slack);
+        ArrangementResultWithDateDTO RunBLFAlgorithmWithSlack(List<BlockDTO> inputBlockList, List<Int32[,]> ArrangementMatrixList, List<WorkshopDTO> WorkShopInfo, DateTime ArranegementStartDate, DateTime ArrangementFinishDate, ToolStripProgressBar ProgressBar, ToolStripStatusLabel ProgressLabel, int Slack);
+        ArrangementResultWithDateDTO RunBLFAlgorithmWithSlackWithPriority(List<BlockDTO> inputBlockList, List<Int32[,]> ArrangementMatrixList, List<WorkshopDTO> WorkShopInfo, DateTime ArranegementStartDate, DateTime ArrangementFinishDate, ToolStripProgressBar ProgressBar, ToolStripStatusLabel ProgressLabel, int Slack);
 
     }
 }

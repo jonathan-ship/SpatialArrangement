@@ -72,6 +72,7 @@
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.chtWorkshop1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.chtTotal = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.bLFWithPriorityToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -188,6 +189,7 @@
             this.runRToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.bLFAlgorithmBToolStripMenuItem,
             this.bLFWithSlackToolStripMenuItem,
+            this.bLFWithPriorityToolStripMenuItem,
             this.toolStripSeparator2});
             this.runRToolStripMenuItem.Name = "runRToolStripMenuItem";
             this.runRToolStripMenuItem.Size = new System.Drawing.Size(109, 20);
@@ -196,21 +198,21 @@
             // bLFAlgorithmBToolStripMenuItem
             // 
             this.bLFAlgorithmBToolStripMenuItem.Name = "bLFAlgorithmBToolStripMenuItem";
-            this.bLFAlgorithmBToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
+            this.bLFAlgorithmBToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.bLFAlgorithmBToolStripMenuItem.Text = "BLF Algorithm (&B)";
             this.bLFAlgorithmBToolStripMenuItem.Click += new System.EventHandler(this.bLFAlgorithmBToolStripMenuItem_Click);
             // 
             // bLFWithSlackToolStripMenuItem
             // 
             this.bLFWithSlackToolStripMenuItem.Name = "bLFWithSlackToolStripMenuItem";
-            this.bLFWithSlackToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
+            this.bLFWithSlackToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.bLFWithSlackToolStripMenuItem.Text = "BLF with Slack";
             this.bLFWithSlackToolStripMenuItem.Click += new System.EventHandler(this.bLFWithSlackToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(167, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(177, 6);
             // 
             // reportRToolStripMenuItem
             // 
@@ -469,6 +471,13 @@
             this.chtTotal.Text = "chart2";
             this.chtTotal.Click += new System.EventHandler(this.chtTotal_Click);
             // 
+            // bLFWithPriorityToolStripMenuItem
+            // 
+            this.bLFWithPriorityToolStripMenuItem.Name = "bLFWithPriorityToolStripMenuItem";
+            this.bLFWithPriorityToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.bLFWithPriorityToolStripMenuItem.Text = "BLF with Priority";
+            this.bLFWithPriorityToolStripMenuItem.Click += new System.EventHandler(this.bLFWithPriorityToolStripMenuItem_Click);
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
@@ -544,5 +553,6 @@
         private System.Windows.Forms.ToolStripMenuItem openPlateDateInfomationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openWorkshopMatrixInformationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem bLFWithSlackToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem bLFWithPriorityToolStripMenuItem;
     }
 }

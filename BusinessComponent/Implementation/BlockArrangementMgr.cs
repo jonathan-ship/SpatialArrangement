@@ -358,7 +358,7 @@ namespace Eoba.Shipyard.ArrangementSimulator.BusinessComponent.Implementation
         /// <param name="ArrangementFinishDate">배치 종료일</param>
         /// <returns>블록 배치 결과</returns>
         /// 최초 작성 : 주수헌, 2015년 9월 20일
-        /// 수정 일자 : 유상현, 2016년 5월 15일
+        /// 수정 일자 : 유상현, 2020년 5월 15일
         ArrangementResultWithDateDTO IBlockArrangement.RunBLFAlgorithmWithAddress(List<BlockDTO> inputBlockList, List<Int32[,]> ArrangementMatrixList, List<WorkshopDTO> WorkShopInfo, DateTime ArrangementStartDate, DateTime ArrangementFinishDate, ToolStripProgressBar ProgressBar, ToolStripStatusLabel ProgressLabel)
         {
             ArrangementResultWithDateDTO ResultInfo;
@@ -496,8 +496,8 @@ namespace Eoba.Shipyard.ArrangementSimulator.BusinessComponent.Implementation
                         // 도로 주변에 배치해야하는 경우
                         if (Block.IsRoadSide == true)
                         {
-                            BlockLocation = DetermineBlockLocationOnRoadSide(CurrentArrangementMatrix[CurrentWorkShopNumber], Block.RowCount, Block.ColumnCount, 1, WorkShopInfo[CurrentWorkShopNumber].RoadSide);
-                            if (BlockLocation[0] == -1) BlockLocation = DetermineBlockLocationOnRoadSide(CurrentArrangementMatrix[CurrentWorkShopNumber], Block.RowCount, Block.ColumnCount, 0, WorkShopInfo[CurrentWorkShopNumber].RoadSide);
+                            BlockLocation = DetermineBlockLocationOnRoadSide(CurrentArrangementMatrix[CurrentWorkShopNumber], Block.RowCount, Block.ColumnCount, 1, WorkShopInfo[CurrentWorkShopNumber]);
+                            if (BlockLocation[0] == -1) BlockLocation = DetermineBlockLocationOnRoadSide(CurrentArrangementMatrix[CurrentWorkShopNumber], Block.RowCount, Block.ColumnCount, 0, WorkShopInfo[CurrentWorkShopNumber]);
                         }
                         else
                         {
@@ -600,7 +600,7 @@ namespace Eoba.Shipyard.ArrangementSimulator.BusinessComponent.Implementation
         }
 
         /// <summary>
-        /// 투입일, 반출일, 지번을 고려한 BLF 알고리즘 + 여유공간
+        /// 투입일, 반출일을 고려한 BLF 알고리즘 + 여유공간
         /// </summary>
         /// <param name="inputBlockList">입력 블록 정보</param>
         /// <param name="ArrangementMatrix">배치할 작업장에 대한 정보(그리드)</param>
@@ -609,8 +609,8 @@ namespace Eoba.Shipyard.ArrangementSimulator.BusinessComponent.Implementation
         /// <param name="ArrangementFinishDate">배치 종료일</param>
         /// <returns>블록 배치 결과</returns>
         /// 최초 작성 : 주수헌, 2015년 9월 20일
-        /// 수정 일자 : 유상현, 2016년 5월 15일
-        ArrangementResultWithDateDTO IBlockArrangement.RunBLFAlgorithmWithAddressWithSlack(List<BlockDTO> inputBlockList, List<Int32[,]> ArrangementMatrixList, List<WorkshopDTO> WorkShopInfo, DateTime ArrangementStartDate, DateTime ArrangementFinishDate, ToolStripProgressBar ProgressBar, ToolStripStatusLabel ProgressLabel, int Slack)
+        /// 수정 일자 : 유상현, 2020년 5월 15일
+        ArrangementResultWithDateDTO IBlockArrangement.RunBLFAlgorithmWithSlack(List<BlockDTO> inputBlockList, List<Int32[,]> ArrangementMatrixList, List<WorkshopDTO> WorkShopInfo, DateTime ArrangementStartDate, DateTime ArrangementFinishDate, ToolStripProgressBar ProgressBar, ToolStripStatusLabel ProgressLabel, int Slack)
         {
             ArrangementResultWithDateDTO ResultInfo;
 
@@ -632,8 +632,8 @@ namespace Eoba.Shipyard.ArrangementSimulator.BusinessComponent.Implementation
             for (int i = 0; i < inputBlockList.Count; i++)
             {
                 BlockList.Add(inputBlockList[i].Clone());
-                BlockList[i].RowCount += Slack * 2;
-                BlockList[i].ColumnCount += Slack * 2;
+                BlockList[i].RowCount += Slack * 2 + BlockList[i].UpperSideCount + BlockList[i].BottomSideCount;
+                BlockList[i].ColumnCount += Slack * 2 + BlockList[i].LeftSideCount + BlockList[i].RightSideCount;
             }
 
             List<BlockDTO> TodayCandidateBlockList;
@@ -694,68 +694,28 @@ namespace Eoba.Shipyard.ArrangementSimulator.BusinessComponent.Implementation
                     {
                         CurrentWorkShopNumber = Block.PreferWorkShopIndexList[PreferWorkShopCount];
 
-                        #region 첫 작업장에서 선호 지번 고려한 배치
-                        // PreferWorkShopCount = 0이면 선호 지번 고려한 배치. if (PreferWorkshopCount == 0) for (int PreferAddressCount = 0; PreferAddressCount < Block.PreferAddressIndexList.Count; PreferAddressCount++) 선호지번 고려한 배치가능구역 탐색 함수
-                        if (PreferWorkShopCount == 0)
-                        {
-                            for (int PreferAddressCount = 0; PreferAddressCount < Block.PreferAddressIndexList.Count; PreferAddressCount++)
-                            {
-                                // 선호지번의 좌우측 경계 열 번호 가져오기
-                                double AddressLeftPoint = WorkShopInfo[CurrentWorkShopNumber].AddressColumnLocation[Block.PreferAddressIndexList[PreferAddressCount]];
-                                double AddressRightPoint;
-                                try
-                                {
-                                    AddressRightPoint = WorkShopInfo[CurrentWorkShopNumber].AddressColumnLocation[Block.PreferAddressIndexList[PreferAddressCount] + 1];
-                                }
-                                catch (Exception)
-                                {
-                                    AddressRightPoint = WorkShopInfo[CurrentWorkShopNumber].ColumnCount;
-                                }
-
-                                // 해당 선호지번 구역 내에서 배치 가능 유무 파악
-                                int[] tempBlockLocation = new int[3];
-                                tempBlockLocation = DetermineBlockLocationWithAddress(CurrentArrangementMatrix[CurrentWorkShopNumber], Block.RowCount, Block.ColumnCount, AddressLeftPoint, AddressRightPoint, 1);
-                                if (tempBlockLocation[0] == -1) tempBlockLocation = DetermineBlockLocationWithAddress(CurrentArrangementMatrix[CurrentWorkShopNumber], Block.RowCount, Block.ColumnCount, AddressLeftPoint, AddressRightPoint, 0);
-
-                                // 배치 가능한 경우 배치
-                                if (tempBlockLocation[0] != -1)
-                                {
-                                    // 배치 매트릭스 점유정보 업데이트
-                                    CurrentArrangementMatrix[CurrentWorkShopNumber] = PutBlockOnMatrix(CurrentArrangementMatrix[CurrentWorkShopNumber], tempBlockLocation[0], tempBlockLocation[1], Block.RowCount, Block.ColumnCount, tempBlockLocation[2]);
-                                    // 블록 정보 업데이트
-                                    Block.LocatedRow = tempBlockLocation[0];
-                                    Block.LocatedColumn = tempBlockLocation[1];
-                                    Block.Orientation = tempBlockLocation[2];
-                                    Block.LocatedWorkshopIndex = CurrentWorkShopNumber;
-                                    Block.CurrentLocatedWorkshopIndex = CurrentWorkShopNumber;
-                                    Block.ActualLocatedWorkshopIndex = CurrentWorkShopNumber;
-                                    Block.IsLocated = true;
-                                    Block.IsConditionSatisfied = true;
-                                    Block.ActualImportDate = CurrentArrangementDate;
-                                    // 기타 블록 리스트에 블록 추가
-                                    CurrentArrangementedBlockList.Add(Block);
-                                    TodayImportBlock.Add(Block);
-                                    IsLocated = true;
-                                    break;
-                                }
-                            }
-                        }
-                        if (IsLocated) break; // 작업장 순회 for loop 탈출
-                        #endregion 첫 작업장에서 선호 지번 고려한 배치
-
                         // 지번 신경 안쓰고 그냥 배치
                         // 배치 가능 위치 탐색
                         int[] BlockLocation = new int[3];
                         // 도로 주변에 배치해야하는 경우
                         if (Block.IsRoadSide == true)
                         {
-                            BlockLocation = DetermineBlockLocationOnRoadSide(CurrentArrangementMatrix[CurrentWorkShopNumber], Block.RowCount, Block.ColumnCount, 1, WorkShopInfo[CurrentWorkShopNumber].RoadSide);
-                            if (BlockLocation[0] == -1) BlockLocation = DetermineBlockLocationOnRoadSide(CurrentArrangementMatrix[CurrentWorkShopNumber], Block.RowCount, Block.ColumnCount, 0, WorkShopInfo[CurrentWorkShopNumber].RoadSide);
+                            if (Block.ArrangementDirection == -1)
+                            {
+                                BlockLocation = DetermineBlockLocationOnRoadSide(CurrentArrangementMatrix[CurrentWorkShopNumber], Block.RowCount, Block.ColumnCount, 0, WorkShopInfo[CurrentWorkShopNumber]);
+                                if (BlockLocation[0] == -1) BlockLocation = DetermineBlockLocationOnRoadSide(CurrentArrangementMatrix[CurrentWorkShopNumber], Block.RowCount, Block.ColumnCount, 1, WorkShopInfo[CurrentWorkShopNumber]);
+                            }
+                            else BlockLocation = DetermineBlockLocationOnRoadSide(CurrentArrangementMatrix[CurrentWorkShopNumber], Block.RowCount, Block.ColumnCount, Block.ArrangementDirection, WorkShopInfo[CurrentWorkShopNumber]);
+
                         }
                         else
                         {
-                            BlockLocation = DetermineBlockLocation(CurrentArrangementMatrix[CurrentWorkShopNumber], Block.RowCount, Block.ColumnCount, 1);
-                            if (BlockLocation[0] == -1) BlockLocation = DetermineBlockLocation(CurrentArrangementMatrix[CurrentWorkShopNumber], Block.RowCount, Block.ColumnCount, 0);
+                            if (Block.ArrangementDirection == -1)
+                            {
+                                BlockLocation = DetermineBlockLocationWithSearchDirection(CurrentArrangementMatrix[CurrentWorkShopNumber], Block.RowCount, Block.ColumnCount, 0, Block.SearchDirection);
+                                if (BlockLocation[0] == -1) BlockLocation = DetermineBlockLocationWithSearchDirection(CurrentArrangementMatrix[CurrentWorkShopNumber], Block.RowCount, Block.ColumnCount, 1, Block.SearchDirection);
+                            }
+                            else BlockLocation = DetermineBlockLocationWithSearchDirection(CurrentArrangementMatrix[CurrentWorkShopNumber], Block.RowCount, Block.ColumnCount, Block.ArrangementDirection, Block.SearchDirection);
                         }
 
                         // 배치 가능한 경우 배치
@@ -824,8 +784,8 @@ namespace Eoba.Shipyard.ArrangementSimulator.BusinessComponent.Implementation
                 for (int i = 0; i < CurrentArrangementedBlockList.Count; i++)
                 {
                     BlockDTO temp = CurrentArrangementedBlockList[i].Clone();
-                    temp.LocatedRow = CurrentArrangementedBlockList[i].LocatedRow;
-                    temp.LocatedColumn = CurrentArrangementedBlockList[i].LocatedColumn;
+                    temp.LocatedRow = CurrentArrangementedBlockList[i].LocatedRow + temp.UpperSideCount;
+                    temp.LocatedColumn = CurrentArrangementedBlockList[i].LocatedColumn + temp.LeftSideCount;
                     temp.Orientation = CurrentArrangementedBlockList[i].Orientation;
                     temp.CurrentLocatedWorkshopIndex = CurrentArrangementedBlockList[i].CurrentLocatedWorkshopIndex;
                     temp.CurrentLocatedAddressIndex = CurrentArrangementedBlockList[i].CurrentLocatedAddressIndex;
@@ -835,9 +795,455 @@ namespace Eoba.Shipyard.ArrangementSimulator.BusinessComponent.Implementation
                     temp.IsConditionSatisfied = CurrentArrangementedBlockList[i].IsConditionSatisfied;
                     temp.IsDelayed = CurrentArrangementedBlockList[i].IsDelayed;
 
-                    //양측 여유공간 다시 빼줌
-                    temp.RowCount -= Slack * 2;
-                    temp.ColumnCount -= Slack * 2;
+                    //여유공간 다시 빼줌
+                    temp.RowCount -= Slack * 2 + temp.UpperSideCount + temp.BottomSideCount;
+                    temp.ColumnCount -= Slack * 2 + temp.LeftSideCount + temp.RightSideCount;
+
+                    tempBlockList.Add(temp);
+                }
+
+                TotalDailyArragnementedBlockList.Add(tempBlockList);
+                CurrentArrangementDate = CurrentArrangementDate.AddDays(1);
+
+                count++;
+
+            }//while 종료
+
+            ProgressLabel.Text = "Completed!";
+            ProgressBar.GetCurrentParent().Refresh();
+
+            //결과 전달을 위한 DTO 생성
+            ResultInfo = new ArrangementResultWithDateDTO(TotalWorkshopResultList, BlockList, ArrangementStartDate, ArrangementFinishDate, TotalDailyArragnementedBlockList, TotalBlockImportLogList, TotalBlockExportLogList, TotalDailyDelayedBlockList);
+            return ResultInfo;
+        }
+
+        /// <summary>
+        /// 투입일, 반출일, 지번을 고려한 BLF 알고리즘 + 여유공간 + 우선배치 
+        /// </summary>
+        /// <param name="inputBlockList">입력 블록 정보</param>
+        /// <param name="ArrangementMatrix">배치할 작업장에 대한 정보(그리드)</param>
+        /// <param name="WorkShopInfo">배치할 작업장에 대한 정보</param>
+        /// <param name="ArrangementStartDate">배치 시작일</param>
+        /// <param name="ArrangementFinishDate">배치 종료일</param>
+        /// <returns>블록 배치 결과</returns>
+        /// 최초 작성 : 주수헌, 2015년 9월 20일
+        /// 수정 일자 : 유상현, 2020년 6월 27일
+        ArrangementResultWithDateDTO IBlockArrangement.RunBLFAlgorithmWithSlackWithPriority(List<BlockDTO> inputBlockList, List<Int32[,]> ArrangementMatrixList, List<WorkshopDTO> WorkShopInfo, DateTime ArrangementStartDate, DateTime ArrangementFinishDate, ToolStripProgressBar ProgressBar, ToolStripStatusLabel ProgressLabel, int Slack)
+        {
+            ArrangementResultWithDateDTO ResultInfo;
+
+            List<List<WorkshopDTO>> TotalWorkshopResultList = new List<List<WorkshopDTO>>();
+            List<Int32[,]> CurrentArrangementMatrix = ArrangementMatrixList;
+            List<BlockDTO> CurrentArrangementedBlockList = new List<BlockDTO>();
+            List<List<BlockDTO>> TotalDailyArragnementedBlockList = new List<List<BlockDTO>>();
+            List<BlockDTO> BlockList = new List<BlockDTO>();
+            List<List<BlockDTO>> TotalBlockImportLogList = new List<List<BlockDTO>>();
+            List<List<BlockDTO>> TotalBlockExportLogList = new List<List<BlockDTO>>();
+            List<List<BlockDTO>> TotalDailyDelayedBlockList = new List<List<BlockDTO>>();
+
+            List<List<Int32[,]>> PriorityMatrixList = new List<List<int[,]>>();
+
+            DateTime CurrentArrangementDate = new DateTime();
+
+            // 배치 시작일을 현재 배치일로 지정
+            CurrentArrangementDate = ArrangementStartDate;
+
+            // 입력 블록 리스트를 함수 내부에서 사용할 리스트로 복사 + 양측 여유공간 더해줌
+            for (int i = 0; i < inputBlockList.Count; i++)
+            {
+                BlockList.Add(inputBlockList[i].Clone());
+                BlockList[i].RowCount += Slack * 2 + BlockList[i].UpperSideCount + BlockList[i].BottomSideCount;
+                BlockList[i].ColumnCount += Slack * 2 + BlockList[i].LeftSideCount + BlockList[i].RightSideCount;
+            }
+
+            List<BlockDTO> TodayCandidateBlockList;
+            List<BlockDTO> TodayImportBlock;
+            List<BlockDTO> TodayExportBlock;
+            List<BlockDTO> TodayDelayedBlockList;
+
+            TimeSpan ts = ArrangementFinishDate - ArrangementStartDate;
+            int differenceInDays = ts.Days;
+            ProgressBar.Maximum = differenceInDays;
+            int count = 0;
+
+            //우선순위 블록 먼저 배치
+            //시작일과 종료일 사이에서 하루씩 시간을 진행하면서 배치를 진행
+            while (DateTime.Compare(CurrentArrangementDate, ArrangementFinishDate) < 0)
+            {
+
+                ProgressBar.Value = count;
+                ProgressLabel.Text = "우선 배치 블록 : " + CurrentArrangementDate.ToString("yyyy-MM-dd") + " (" + (Math.Round(((double)count / (double)differenceInDays) * 100.0, 2)).ToString() + "%)";
+                ProgressBar.GetCurrentParent().Refresh();
+
+                TodayCandidateBlockList = new List<BlockDTO>();
+                TodayImportBlock = new List<BlockDTO>();
+                TodayExportBlock = new List<BlockDTO>();
+                TodayDelayedBlockList = new List<BlockDTO>();
+
+                //현재의 작업장 배치 정보 중, 반출일에 해당하는 블록을 제거
+                foreach (BlockDTO Block in CurrentArrangementedBlockList)
+                {
+                    if (Block.ExportDate.AddDays(1) == CurrentArrangementDate)
+                    {
+                        //블록의 배치 상태 및 완료 상태, 실제 반출 날짜 기록
+                        Block.IsLocated = false;
+                        Block.IsFinished = true;
+                        Block.ActualExportDate = CurrentArrangementDate;
+                        //당일 반출 블록 목록에 추가
+                        TodayExportBlock.Add(Block);
+                        // 배치 매트릭스에서 반출 블록 점유 정보 제거
+                        CurrentArrangementMatrix[Block.LocatedWorkshopIndex] = RemoveBlockFromMatrix(CurrentArrangementMatrix[Block.LocatedWorkshopIndex], Block.LocatedRow, Block.LocatedColumn, Block.RowCount, Block.ColumnCount, Block.Orientation);
+                    }
+                }
+                // 현재 작업장에 배치중인 블록 리스트에서 반출 블록을 제거
+                foreach (BlockDTO Block in TodayExportBlock) CurrentArrangementedBlockList.Remove(Block);
+
+                // 오늘 배치해야 할 BlockList 생성
+                // Delay 된 것 먼저 추가 - 우선배치 블록은 지연 없음
+                // if (TotalDailyDelayedBlockList.Count != 0) foreach (BlockDTO Block in TotalDailyDelayedBlockList[TotalDailyDelayedBlockList.Count - 1]) TodayCandidateBlockList.Add(Block);
+                // 원래 배치 일이 오늘인 것 추가
+                // 우선순위 블록만 배치 리스트에 추가
+                foreach (BlockDTO Block in BlockList) if (Block.IsDelayed == false & Block.IsFinished == false & Block.IsLocated == false & Block.ImportDate == CurrentArrangementDate & Block.IsPrior == true) TodayCandidateBlockList.Add(Block);
+
+
+                // 오늘 배치해야 할 BlockList에서 차례로 배치
+                foreach (BlockDTO Block in TodayCandidateBlockList)
+                {
+                    bool IsLocated = false;
+                    int CurrentWorkShopNumber = 0;
+                    // 작업장 순회 for loop
+                    for (int PreferWorkShopCount = 0; PreferWorkShopCount < Block.PreferWorkShopIndexList.Count; PreferWorkShopCount++)
+                    {
+                        CurrentWorkShopNumber = Block.PreferWorkShopIndexList[PreferWorkShopCount];
+
+                        // 지번 신경 안쓰고 그냥 배치
+                        // 배치 가능 위치 탐색
+                        int[] BlockLocation = new int[3];
+                        // 도로 주변에 배치해야하는 경우
+                        if (Block.IsRoadSide == true)
+                        {
+                            if (Block.ArrangementDirection == -1)
+                            {
+                                BlockLocation = DetermineBlockLocationOnRoadSide(CurrentArrangementMatrix[CurrentWorkShopNumber], Block.RowCount, Block.ColumnCount, 0, WorkShopInfo[CurrentWorkShopNumber]);
+                                if (BlockLocation[0] == -1) BlockLocation = DetermineBlockLocationOnRoadSide(CurrentArrangementMatrix[CurrentWorkShopNumber], Block.RowCount, Block.ColumnCount, 1, WorkShopInfo[CurrentWorkShopNumber]);
+                            }
+                            else BlockLocation = DetermineBlockLocationOnRoadSide(CurrentArrangementMatrix[CurrentWorkShopNumber], Block.RowCount, Block.ColumnCount, Block.ArrangementDirection, WorkShopInfo[CurrentWorkShopNumber]);
+
+                        }
+                        else
+                        {
+                            if (Block.ArrangementDirection == -1)
+                            {
+                                BlockLocation = DetermineBlockLocationWithSearchDirection(CurrentArrangementMatrix[CurrentWorkShopNumber], Block.RowCount, Block.ColumnCount, 0, Block.SearchDirection);
+                                if (BlockLocation[0] == -1) BlockLocation = DetermineBlockLocationWithSearchDirection(CurrentArrangementMatrix[CurrentWorkShopNumber], Block.RowCount, Block.ColumnCount, 1, Block.SearchDirection);
+                            }
+                            else BlockLocation = DetermineBlockLocationWithSearchDirection(CurrentArrangementMatrix[CurrentWorkShopNumber], Block.RowCount, Block.ColumnCount, Block.ArrangementDirection, Block.SearchDirection);
+                        }
+
+                        if (CurrentArrangementDate == new DateTime(2020, 3, 9))
+                        {
+                            int testInt = 1;
+                        }
+                        if (Block.Index == 102)
+                        {
+                            int test2 = 1;
+                        }
+
+                        // 배치 가능한 경우 배치
+                        if (BlockLocation[0] != -1)
+                        {
+                            // 배치 매트릭스 점유정보 업데이트
+                            CurrentArrangementMatrix[CurrentWorkShopNumber] = PutBlockOnMatrix(CurrentArrangementMatrix[CurrentWorkShopNumber], BlockLocation[0], BlockLocation[1], Block.RowCount, Block.ColumnCount, BlockLocation[2]);
+                            // 블록 정보 업데이트
+                            Block.LocatedRow = BlockLocation[0];
+                            Block.LocatedColumn = BlockLocation[1];
+                            Block.Orientation = BlockLocation[2];
+                            Block.LocatedWorkshopIndex = CurrentWorkShopNumber;
+                            Block.CurrentLocatedWorkshopIndex = CurrentWorkShopNumber;
+                            Block.ActualLocatedWorkshopIndex = CurrentWorkShopNumber;
+                            Block.IsLocated = true;
+                            Block.ActualImportDate = CurrentArrangementDate;
+                            // 기타 블록 리스트에 블록 추가 -> 일반 블록 배치하고 나서 같이 하기
+                            CurrentArrangementedBlockList.Add(Block);
+                            //TodayImportBlock.Add(Block);
+                            IsLocated = true;
+                            break; // 작업장 순회 for loop 탈출
+                        }
+
+                    } // 작업장 순회 for loop 종료
+                    //if (!IsLocated)
+                    //{
+                    //    TodayDelayedBlockList.Add(Block);
+                    //    Block.IsDelayed = true;
+                    //    Block.DelayedTime += 1;
+                    //    Block.ImportDate = Block.ImportDate.AddDays(1);
+                    //    Block.ExportDate = Block.ExportDate.AddDays(1);
+                    //}
+                    //if 종료
+                } // 오늘 배치해야 할 블록들 배치 완료
+
+                //이건 일반 배치 블록 다 끝나고 할 수 있도록. 그러려면 CurrentArrangementedBlockList가 보존되어야 함. 문제 -> 우선순위 블록 배치하는 과정에서, 제거하게 되는 블록은 CurrentArrangementedBlockList에서도 제거하게 됨. -> TotalDailyArrangementedBlockList를 활용해야 할 듯 싶은데??
+                //날짜별 배치 결과를 바탕으로 날짜별 작업장의 블록 배치 개수와 공간 점유율 계산
+                //List<WorkshopDTO> tempWorkshopInfo = new List<WorkshopDTO>();
+                //List<List<int>> tempBlockIndexList = new List<List<int>>();
+                //double[] SumBlockArea = new double[WorkShopInfo.Count];
+                //for (int n = 0; n < WorkShopInfo.Count; n++)
+                //{
+                //    tempWorkshopInfo.Add(WorkShopInfo[n].Clone());
+                //    tempBlockIndexList.Add(new List<int>());
+                //    SumBlockArea[n] = 0;
+                //}
+                //foreach (BlockDTO Block in CurrentArrangementedBlockList)
+                //{
+                //    tempBlockIndexList[Block.CurrentLocatedWorkshopIndex].Add(Block.Index);
+                //    SumBlockArea[Block.CurrentLocatedWorkshopIndex] += Block.RowCount * Block.ColumnCount;
+                //}
+                //foreach (WorkshopDTO Workshop in tempWorkshopInfo)
+                //{
+                //    Workshop.LocatedBlockIndexList = tempBlockIndexList[Workshop.Index];
+                //    Workshop.NumOfLocatedBlocks = Workshop.LocatedBlockIndexList.Count;
+                //    Workshop.AreaUtilization = SumBlockArea[Workshop.Index] / (Workshop.RowCount * Workshop.ColumnCount);
+                //}
+
+                // 일반배치 블록에서는 여기서 리스트를 더하는게 아니라. TotalBlockImportLogList[count].Add(Block) 이렇게 블록단위로해야 할 듯. 아니면 tempList에 저장해놨다가 여기서 한번에 하던가.
+                // 아니면 우선순위 블록배치할 때는 진짜 위치, 날짜 등만 정하고 끝나고, 각종 리스트에 더하는건 일반 블록 배치할 때 우선순위 블록 예외처리해서 위치 결정과정만 건너뛰고 리스트에는 그 때 추가하는 걸로 하던가. 내일 뭐가 더 좋을지 생각해보자!
+                // 일단 후자가 더 좋아보임 ㅎ
+                //날짜별 변수를 리스트에 저장
+                //TotalBlockImportLogList.Add(TodayImportBlock);
+                //TotalBlockExportLogList.Add(TodayExportBlock);
+                //TotalDailyDelayedBlockList.Add(TodayDelayedBlockList);
+                //TotalWorkshopResultList.Add(tempWorkshopInfo);
+
+                //List<BlockDTO> tempBlockList = new List<BlockDTO>();
+
+                //for (int i = 0; i < CurrentArrangementedBlockList.Count; i++)
+                //{
+                //    BlockDTO temp = CurrentArrangementedBlockList[i].Clone();
+                //    temp.LocatedRow = CurrentArrangementedBlockList[i].LocatedRow + temp.UpperSideCount;
+                //    temp.LocatedColumn = CurrentArrangementedBlockList[i].LocatedColumn + temp.LeftSideCount;
+                //    temp.Orientation = CurrentArrangementedBlockList[i].Orientation;
+                //    temp.CurrentLocatedWorkshopIndex = CurrentArrangementedBlockList[i].CurrentLocatedWorkshopIndex;
+                //    temp.CurrentLocatedAddressIndex = CurrentArrangementedBlockList[i].CurrentLocatedAddressIndex;
+                //    temp.IsLocated = CurrentArrangementedBlockList[i].IsLocated;
+                //    temp.IsFinished = CurrentArrangementedBlockList[i].IsFinished;
+                //    temp.IsRoadSide = CurrentArrangementedBlockList[i].IsRoadSide;
+                //    temp.IsConditionSatisfied = CurrentArrangementedBlockList[i].IsConditionSatisfied;
+                //    temp.IsDelayed = CurrentArrangementedBlockList[i].IsDelayed;
+
+                //    //여유공간 다시 빼줌
+                //    temp.RowCount -= Slack * 2 + temp.UpperSideCount + temp.BottomSideCount;
+                //    temp.ColumnCount -= Slack * 2 + temp.LeftSideCount + temp.RightSideCount;
+
+                //    tempBlockList.Add(temp);
+                //}
+
+                //TotalDailyArragnementedBlockList.Add(tempBlockList);
+                CurrentArrangementDate = CurrentArrangementDate.AddDays(1);
+
+                List<Int32[,]> tempMatrixList = new List<Int32[,]>();
+                foreach(int[,] Matrix in CurrentArrangementMatrix)
+                {
+                    int[,] tempMatrix = CloneMatrix(Matrix);
+                    tempMatrixList.Add(tempMatrix);
+                }
+
+                PriorityMatrixList.Add(tempMatrixList);
+
+                count++;
+
+            }//while 종료
+
+
+            // 현재 배치일 초기화
+            CurrentArrangementDate = ArrangementStartDate;
+            count = 0;
+
+            //일반 배치 블록에 대해서 배치 진행
+            //시작일과 종료일 사이에서 하루씩 시간을 진행하면서 배치를 진행
+            while (DateTime.Compare(CurrentArrangementDate, ArrangementFinishDate) < 0)
+            {
+
+                ProgressBar.Value = count;
+                ProgressLabel.Text = "일반 배치 블록 : " + CurrentArrangementDate.ToString("yyyy-MM-dd") + " (" + (Math.Round(((double)count / (double)differenceInDays) * 100.0, 2)).ToString() + "%)";
+                ProgressBar.GetCurrentParent().Refresh();
+
+                TodayCandidateBlockList = new List<BlockDTO>();
+                TodayImportBlock = new List<BlockDTO>();
+                TodayExportBlock = new List<BlockDTO>();
+                TodayDelayedBlockList = new List<BlockDTO>();
+
+                //현재의 작업장 배치 정보 중, 반출일에 해당하는 블록을 제거
+                foreach (BlockDTO Block in CurrentArrangementedBlockList)
+                {
+                    if (Block.ExportDate.AddDays(1) == CurrentArrangementDate)
+                    {
+                        // 일반 블록인 경우 그대로 진행
+                        if (Block.IsPrior == false)
+                        {
+                            //블록의 배치 상태 및 완료 상태, 실제 반출 날짜 기록
+                            Block.IsLocated = false;
+                            Block.IsFinished = true;
+                            Block.ActualExportDate = CurrentArrangementDate;
+                            //당일 반출 블록 목록에 추가
+                            TodayExportBlock.Add(Block);
+                            // 배치 매트릭스에서 반출 블록 점유 정보 제거
+                            CurrentArrangementMatrix[Block.LocatedWorkshopIndex] = RemoveBlockFromMatrix(CurrentArrangementMatrix[Block.LocatedWorkshopIndex], Block.LocatedRow, Block.LocatedColumn, Block.RowCount, Block.ColumnCount, Block.Orientation);
+                        }
+                        // 우선 배치 블록인 경우 리스트에만 추가
+                        else TodayExportBlock.Add(Block);
+                    }
+                }
+                // 현재 작업장에 배치중인 블록 리스트에서 반출 블록을 제거
+                foreach (BlockDTO Block in TodayExportBlock) CurrentArrangementedBlockList.Remove(Block);
+
+                // 오늘 배치해야 할 BlockList 생성
+                // Delay 된 것 먼저 추가
+                if (TotalDailyDelayedBlockList.Count != 0) foreach (BlockDTO Block in TotalDailyDelayedBlockList[TotalDailyDelayedBlockList.Count - 1]) TodayCandidateBlockList.Add(Block);
+                // 일반 블록 중 원래 배치 일이 오늘인 것 추가
+                foreach (BlockDTO Block in BlockList) if (Block.IsDelayed == false & Block.IsFinished == false & Block.IsLocated == false & Block.ImportDate == CurrentArrangementDate & Block.IsPrior == false) TodayCandidateBlockList.Add(Block);
+
+                // 우선순위 블록 중 오늘 배치해야할 블록은 결과 리스트에만 추가
+                foreach (BlockDTO Block in BlockList)
+                {
+                    if (Block.ImportDate == CurrentArrangementDate & Block.IsPrior == true)
+                    {
+                        CurrentArrangementedBlockList.Add(Block);
+                        TodayImportBlock.Add(Block);
+                    }
+                }
+
+                // 오늘 배치해야 할 BlockList에서 차례로 배치
+                foreach (BlockDTO Block in TodayCandidateBlockList)
+                {
+                    bool IsLocated = false;
+                    int CurrentWorkShopNumber = 0;
+                    // 작업장 순회 for loop
+                    for (int PreferWorkShopCount = 0; PreferWorkShopCount < Block.PreferWorkShopIndexList.Count; PreferWorkShopCount++)
+                    {
+                        CurrentWorkShopNumber = Block.PreferWorkShopIndexList[PreferWorkShopCount];
+
+                        // 지번 신경 안쓰고 그냥 배치
+                        // 배치 가능 위치 탐색
+                        int[] BlockLocation = new int[3];
+                        // 도로 주변에 배치해야하는 경우
+                        if (Block.IsRoadSide == true)
+                        {
+                            if (Block.ArrangementDirection == -1)
+                            {
+                                BlockLocation = DetermineBlockLocationOnRoadSide(CurrentArrangementMatrix[CurrentWorkShopNumber], Block.RowCount, Block.ColumnCount, 0, WorkShopInfo[CurrentWorkShopNumber]);
+                                if (BlockLocation[0] == -1) BlockLocation = DetermineBlockLocationOnRoadSide(CurrentArrangementMatrix[CurrentWorkShopNumber], Block.RowCount, Block.ColumnCount, 1, WorkShopInfo[CurrentWorkShopNumber]);
+                            }
+                            else BlockLocation = DetermineBlockLocationOnRoadSide(CurrentArrangementMatrix[CurrentWorkShopNumber], Block.RowCount, Block.ColumnCount, Block.ArrangementDirection, WorkShopInfo[CurrentWorkShopNumber]);
+
+                        }
+                        else
+                        {
+                            if (Block.ArrangementDirection == -1)
+                            {
+                                BlockLocation = DetermineBlockLocationWithSearchDirection(CurrentArrangementMatrix[CurrentWorkShopNumber], Block.RowCount, Block.ColumnCount, 0, Block.SearchDirection);
+                                if (BlockLocation[0] == -1) BlockLocation = DetermineBlockLocationWithSearchDirection(CurrentArrangementMatrix[CurrentWorkShopNumber], Block.RowCount, Block.ColumnCount, 1, Block.SearchDirection);
+                            }
+                            else BlockLocation = DetermineBlockLocationWithSearchDirection(CurrentArrangementMatrix[CurrentWorkShopNumber], Block.RowCount, Block.ColumnCount, Block.ArrangementDirection, Block.SearchDirection);
+                        }
+
+                        // 우선 배치 블록과 충돌하는지 체크
+                        if (BlockLocation[0] != -1)
+                        {
+                            for (int dayCount = 0; dayCount < Block.Leadtime; dayCount++)
+                            {
+                                if (CheckInterference(PriorityMatrixList[count + dayCount][CurrentWorkShopNumber], BlockLocation[0], BlockLocation[1], Block.RowCount, Block.ColumnCount, BlockLocation[2]) == false)
+                                {
+                                    BlockLocation[0] = -1;
+                                    break;
+                                }
+                            }
+                        }
+
+                        // 배치 가능한 경우 배치
+                        if (BlockLocation[0] != -1)
+                        {
+                            // 배치 매트릭스 점유정보 업데이트
+                            CurrentArrangementMatrix[CurrentWorkShopNumber] = PutBlockOnMatrix(CurrentArrangementMatrix[CurrentWorkShopNumber], BlockLocation[0], BlockLocation[1], Block.RowCount, Block.ColumnCount, BlockLocation[2]);
+                            // 블록 정보 업데이트
+                            Block.LocatedRow = BlockLocation[0];
+                            Block.LocatedColumn = BlockLocation[1];
+                            Block.Orientation = BlockLocation[2];
+                            Block.LocatedWorkshopIndex = CurrentWorkShopNumber;
+                            Block.CurrentLocatedWorkshopIndex = CurrentWorkShopNumber;
+                            Block.ActualLocatedWorkshopIndex = CurrentWorkShopNumber;
+                            Block.IsLocated = true;
+                            Block.ActualImportDate = CurrentArrangementDate;
+                            // 기타 블록 리스트에 블록 추가
+                            CurrentArrangementedBlockList.Add(Block);
+                            TodayImportBlock.Add(Block);
+                            IsLocated = true;
+                            break; // 작업장 순회 for loop 탈출
+                        }
+
+                    } // 작업장 순회 for loop 종료
+                    if (!IsLocated)
+                    {
+                        TodayDelayedBlockList.Add(Block);
+                        Block.IsDelayed = true;
+                        Block.DelayedTime += 1;
+                        Block.ImportDate = Block.ImportDate.AddDays(1);
+                        Block.ExportDate = Block.ExportDate.AddDays(1);
+                    }
+                    //if 종료
+                } // 오늘 배치해야 할 블록들 배치 완료
+
+                if (CurrentArrangementDate == new DateTime(2020, 3, 9))
+                {
+                    int testInt = 1;
+                }
+
+                //날짜별 배치 결과를 바탕으로 날짜별 작업장의 블록 배치 개수와 공간 점유율 계산
+                List<WorkshopDTO> tempWorkshopInfo = new List<WorkshopDTO>();
+                List<List<int>> tempBlockIndexList = new List<List<int>>();
+                double[] SumBlockArea = new double[WorkShopInfo.Count];
+                for (int n = 0; n < WorkShopInfo.Count; n++)
+                {
+                    tempWorkshopInfo.Add(WorkShopInfo[n].Clone());
+                    tempBlockIndexList.Add(new List<int>());
+                    SumBlockArea[n] = 0;
+                }
+                foreach (BlockDTO Block in CurrentArrangementedBlockList)
+                {
+                    tempBlockIndexList[Block.CurrentLocatedWorkshopIndex].Add(Block.Index);
+                    SumBlockArea[Block.CurrentLocatedWorkshopIndex] += Block.RowCount * Block.ColumnCount;
+                }
+                foreach (WorkshopDTO Workshop in tempWorkshopInfo)
+                {
+                    Workshop.LocatedBlockIndexList = tempBlockIndexList[Workshop.Index];
+                    Workshop.NumOfLocatedBlocks = Workshop.LocatedBlockIndexList.Count;
+                    Workshop.AreaUtilization = SumBlockArea[Workshop.Index] / (Workshop.RowCount * Workshop.ColumnCount);
+                }
+
+                //날짜별 변수를 리스트에 저장
+                TotalBlockImportLogList.Add(TodayImportBlock);
+                TotalBlockExportLogList.Add(TodayExportBlock);
+                TotalDailyDelayedBlockList.Add(TodayDelayedBlockList);
+                TotalWorkshopResultList.Add(tempWorkshopInfo);
+
+                List<BlockDTO> tempBlockList = new List<BlockDTO>();
+
+                for (int i = 0; i < CurrentArrangementedBlockList.Count; i++)
+                {
+                    BlockDTO temp = CurrentArrangementedBlockList[i].Clone();
+                    temp.LocatedRow = CurrentArrangementedBlockList[i].LocatedRow + temp.UpperSideCount;
+                    temp.LocatedColumn = CurrentArrangementedBlockList[i].LocatedColumn + temp.LeftSideCount;
+                    temp.Orientation = CurrentArrangementedBlockList[i].Orientation;
+                    temp.CurrentLocatedWorkshopIndex = CurrentArrangementedBlockList[i].CurrentLocatedWorkshopIndex;
+                    temp.CurrentLocatedAddressIndex = CurrentArrangementedBlockList[i].CurrentLocatedAddressIndex;
+                    temp.IsLocated = CurrentArrangementedBlockList[i].IsLocated;
+                    temp.IsFinished = CurrentArrangementedBlockList[i].IsFinished;
+                    temp.IsRoadSide = CurrentArrangementedBlockList[i].IsRoadSide;
+                    temp.IsConditionSatisfied = CurrentArrangementedBlockList[i].IsConditionSatisfied;
+                    temp.IsDelayed = CurrentArrangementedBlockList[i].IsDelayed;
+
+                    //여유공간 다시 빼줌
+                    temp.RowCount -= Slack * 2 + temp.UpperSideCount + temp.BottomSideCount;
+                    temp.ColumnCount -= Slack * 2 + temp.LeftSideCount + temp.RightSideCount;
 
                     tempBlockList.Add(temp);
                 }
@@ -1308,6 +1714,9 @@ namespace Eoba.Shipyard.ArrangementSimulator.BusinessComponent.Implementation
             return ResultRowCol;
         }
 
+        #endregion
+
+        #region 탐색, 배치 실행 기능 함수
 
         /// <summary>
         /// 현재 작업장 배치 현황에서 BLF 배치 위치를 찾는 함수
@@ -1457,7 +1866,7 @@ namespace Eoba.Shipyard.ArrangementSimulator.BusinessComponent.Implementation
         /// </summary>
         /// <param name="CurrentWorkShopMatrix"></param>
         /// <returns>배치될 블록의 바운딩박스 시작 위치 (행,열), 둘다 -1, -1 이면 배치 불가능</returns>
-        int[] DetermineBlockLocationOnRoadSide(Int32[,] CurrentArrangementMatrix, double _BlockRowCount, double _BlockColumnCount, int Orientation, string RoadSide)
+        int[] DetermineBlockLocationOnRoadSide(Int32[,] CurrentArrangementMatrix, double _BlockRowCount, double _BlockColumnCount, int Orientation, WorkshopDTO _WorkshopInfo)
         {
             int BlockRowCount = 0;
             int BlockColumnCount = 0;
@@ -1482,31 +1891,29 @@ namespace Eoba.Shipyard.ArrangementSimulator.BusinessComponent.Implementation
             int WorkshopCol = CurrentArrangementMatrix.GetLength(1);
             bool IsLocated = false; //블록의 배치 유무
 
-            if (RoadSide == "Up")
+            // 모서리를 돌아가면서 탐색, 방향은 좌측 -> 하단 -> 우측 -> 상단
+            // Left side 탐색
+            if (_WorkshopInfo.LeftRoadside != null)
             {
-                for (int column = 0; column < WorkshopCol - BlockColumnCount; column++)
+                for (int row = Convert.ToInt32(Math.Ceiling(_WorkshopInfo.LeftRoadside[0])); row < Convert.ToInt32(Math.Ceiling(_WorkshopInfo.LeftRoadside[1])) - BlockRowCount ; row++)
                 {
-                    int row = 0;
+                    int column = 0;
+                    if (column < 0) break;
 
                     bool IsOccupied = false; // 작업장 셀의 점유유무
-                    // 네 꼭짓점 먼저 탐색
-                    if (CurrentArrangementMatrix[row, column] == 0 & CurrentArrangementMatrix[row + BlockRowCount - 1, column] == 0 & CurrentArrangementMatrix[row, column + BlockColumnCount - 1] == 0 & CurrentArrangementMatrix[row + BlockRowCount, column + BlockColumnCount] == 0)
+
+                    for (int BlockColumn = 0; BlockColumn < BlockColumnCount; BlockColumn++)
                     {
-                        // 네 꼭짓점 모두 비어있다면, 내부 탐색
-                        for (int BlockColumn = 0; BlockColumn < BlockColumnCount; BlockColumn++)
+                        for (int BlockRow = 0; BlockRow < BlockRowCount; BlockRow++)
                         {
-                            for (int BlockRow = 0; BlockRow < BlockRowCount; BlockRow++)
+                            if (CurrentArrangementMatrix[row + BlockRow, column + BlockColumn] != 0)
                             {
-                                if (CurrentArrangementMatrix[row + BlockRow, column + BlockColumn] != 0)
-                                {
-                                    IsOccupied = true;
-                                }
-                                if (IsOccupied) break;
+                                IsOccupied = true;
                             }
                             if (IsOccupied) break;
                         }
-                    } // 네 꼭짓점 중 비어있지 않은 곳이 있다면
-                    else IsOccupied = true;
+                        if (IsOccupied) break;
+                    }
                     //만약에 IsOccupied가 false라서 배치가 가능하다면,
                     if (!IsOccupied)
                     {
@@ -1514,13 +1921,14 @@ namespace Eoba.Shipyard.ArrangementSimulator.BusinessComponent.Implementation
                         ResultRowCol[0] = row;
                         ResultRowCol[1] = column;
                     }
-                    if (IsLocated) break;
-
+                    if (IsLocated) return ResultRowCol;
                 }
             }
-            else if (RoadSide == "Down")
+
+            // Bottom side 탐색
+            if (_WorkshopInfo.BottomRoadside != null)
             {
-                for (int column = 0; column < WorkshopCol - BlockColumnCount; column++)
+                for (int column = Convert.ToInt32(Math.Ceiling(_WorkshopInfo.BottomRoadside[0])); column < Convert.ToInt32(Math.Ceiling(_WorkshopInfo.BottomRoadside[1])) - BlockColumnCount; column++)
                 {
                     int row = WorkshopRow - BlockRowCount;
                     if (row < 0) break;
@@ -1546,12 +1954,194 @@ namespace Eoba.Shipyard.ArrangementSimulator.BusinessComponent.Implementation
                         ResultRowCol[0] = row;
                         ResultRowCol[1] = column;
                     }
-                    if (IsLocated) break;
-
+                    if (IsLocated) return ResultRowCol;
                 }
             }
 
+            // Right side 탐색
+            if (_WorkshopInfo.RightRoadside != null)
+            {
+                for (int row = Convert.ToInt32(Math.Ceiling(_WorkshopInfo.RightRoadside[0])); row < Convert.ToInt32(Math.Ceiling(_WorkshopInfo.RightRoadside[1])) - BlockRowCount; row++)
+                {
+                    int column = WorkshopCol - BlockColumnCount;
+                    if (column < 0) break;
+
+                    bool IsOccupied = false; // 작업장 셀의 점유유무
+
+                    for (int BlockColumn = 0; BlockColumn < BlockColumnCount; BlockColumn++)
+                    {
+                        for (int BlockRow = 0; BlockRow < BlockRowCount; BlockRow++)
+                        {
+                            if (CurrentArrangementMatrix[row + BlockRow, column + BlockColumn] != 0)
+                            {
+                                IsOccupied = true;
+                            }
+                            if (IsOccupied) break;
+                        }
+                        if (IsOccupied) break;
+                    }
+                    //만약에 IsOccupied가 false라서 배치가 가능하다면,
+                    if (!IsOccupied)
+                    {
+                        IsLocated = true;
+                        ResultRowCol[0] = row;
+                        ResultRowCol[1] = column;
+                    }
+                    if (IsLocated) return ResultRowCol;
+                }
+            }
+
+            // Upper side 탐색
+            if (_WorkshopInfo.UpperRoadside != null)
+            {
+                for (int column = Convert.ToInt32(Math.Ceiling(_WorkshopInfo.UpperRoadside[0])); column < Convert.ToInt32(Math.Ceiling(_WorkshopInfo.UpperRoadside[1])) - BlockColumnCount; column++)
+                {
+                    int row = 0;
+
+                    bool IsOccupied = false; // 작업장 셀의 점유유무
+
+                    // 네 꼭짓점 먼저 탐색
+                    if (CurrentArrangementMatrix[row, column] == 0 & CurrentArrangementMatrix[row + BlockRowCount - 1, column] == 0 & CurrentArrangementMatrix[row, column + BlockColumnCount - 1] == 0 & CurrentArrangementMatrix[row + BlockRowCount, column + BlockColumnCount] == 0)
+                    {
+                        // 네 꼭짓점 모두 비어있다면, 내부 탐색
+                        for (int BlockColumn = 0; BlockColumn < BlockColumnCount; BlockColumn++)
+                        {
+                            for (int BlockRow = 0; BlockRow < BlockRowCount; BlockRow++)
+                            {
+                                if (CurrentArrangementMatrix[row + BlockRow, column + BlockColumn] != 0)
+                                {
+                                    IsOccupied = true;
+                                }
+                                if (IsOccupied) break;
+                            }
+                            if (IsOccupied) break;
+                        }
+                    } // 네 꼭짓점 중 비어있지 않은 곳이 있다면
+                    else IsOccupied = true;
+                    //만약에 IsOccupied가 false라서 배치가 가능하다면,
+                    if (!IsOccupied)
+                    {
+                        IsLocated = true;
+                        ResultRowCol[0] = row;
+                        ResultRowCol[1] = column;
+                    }
+                    if (IsLocated) return ResultRowCol;
+                }
+            }
             
+            // 어느 곳도 배치를 못했다면
+            return ResultRowCol;
+        }
+
+        /// <summary>
+        /// 현재 작업장 배치 현황에서 BLF 배치 위치를 찾는 함수, 탐색 방향 명시 기능 추가
+        /// </summary>
+        /// <param name="CurrentWorkShopMatrix"></param>
+        /// <returns>배치될 블록의 바운딩박스 시작 위치 (행,열), 둘다 -1, -1 이면 배치 불가능</returns>
+        int[] DetermineBlockLocationWithSearchDirection(Int32[,] CurrentArrangementMatrix, double _BlockRowCount, double _BlockColumnCount, int Orientation, int SearchDirection)
+        {
+            int BlockRowCount = 0;
+            int BlockColumnCount = 0;
+            if (Orientation == 0)
+            {
+                BlockRowCount = Convert.ToInt32(Math.Ceiling(_BlockRowCount));
+                BlockColumnCount = Convert.ToInt32(Math.Ceiling(_BlockColumnCount));
+            }
+            else if (Orientation == 1)
+            {
+                BlockRowCount = Convert.ToInt32(Math.Ceiling(_BlockColumnCount));
+                BlockColumnCount = Convert.ToInt32(Math.Ceiling(_BlockRowCount));
+            }
+            // Orientation == -1 일 때, 회전시켜서 비교 후 좋은 점 반환하는 코드 작성해야함
+
+            int[] ResultRowCol = new int[3];
+            ResultRowCol[0] = -1;
+            ResultRowCol[1] = -1;
+            ResultRowCol[2] = Orientation;
+
+            int WorkshopRow = CurrentArrangementMatrix.GetLength(0);
+            int WorkshopCol = CurrentArrangementMatrix.GetLength(1);
+
+            bool IsLocated = false; //블록의 배치 유무
+
+            //좌->우 탐색
+            if (SearchDirection == 1)
+            {
+                for (int column = 0; column < WorkshopCol - BlockColumnCount; column++)
+                {
+                    for (int row = 0; row < WorkshopRow - BlockRowCount; row++)
+                    {
+                        bool IsOccupied = false; // 작업장 셀의 점유유무
+
+                        // 네 꼭짓점 먼저 탐색
+                        if (CurrentArrangementMatrix[row, column] == 0 & CurrentArrangementMatrix[row + BlockRowCount - 1, column] == 0 & CurrentArrangementMatrix[row, column + BlockColumnCount - 1] == 0 & CurrentArrangementMatrix[row + BlockRowCount, column + BlockColumnCount] == 0)
+                        {
+                            // 네 꼭짓점 모두 비어있다면, 내부 탐색
+                            for (int BlockColumn = 0; BlockColumn < BlockColumnCount; BlockColumn++)
+                            {
+                                for (int BlockRow = 0; BlockRow < BlockRowCount; BlockRow++)
+                                {
+                                    if (CurrentArrangementMatrix[row + BlockRow, column + BlockColumn] != 0)
+                                    {
+                                        IsOccupied = true;
+                                    }
+                                    if (IsOccupied) break;
+                                }
+                                if (IsOccupied) break;
+                            }
+                        } // 네 꼭짓점 중 비어있지 않은 곳이 있다면
+                        else IsOccupied = true;
+                        //만약에 IsOccupied가 false라서 배치가 가능하다면,
+                        if (!IsOccupied)
+                        {
+                            IsLocated = true;
+                            ResultRowCol[0] = row;
+                            ResultRowCol[1] = column;
+                        }
+                        if (IsLocated) break;
+                    }
+                    if (IsLocated) break;
+                }
+            }
+            //우->좌 탐색
+            else
+            {
+                for (int column = WorkshopCol - BlockColumnCount-1; column >=0 ; column--)
+                {
+                    for (int row = 0; row < WorkshopRow - BlockRowCount; row++)
+                    {
+                        bool IsOccupied = false; // 작업장 셀의 점유유무
+
+                        // 네 꼭짓점 먼저 탐색
+                        if (CurrentArrangementMatrix[row, column] == 0 & CurrentArrangementMatrix[row + BlockRowCount - 1, column] == 0 & CurrentArrangementMatrix[row, column + BlockColumnCount - 1] == 0 & CurrentArrangementMatrix[row + BlockRowCount, column + BlockColumnCount] == 0)
+                        {
+                            // 네 꼭짓점 모두 비어있다면, 내부 탐색
+                            for (int BlockColumn = 0; BlockColumn < BlockColumnCount; BlockColumn++)
+                            {
+                                for (int BlockRow = 0; BlockRow < BlockRowCount; BlockRow++)
+                                {
+                                    if (CurrentArrangementMatrix[row + BlockRow, column + BlockColumn] != 0)
+                                    {
+                                        IsOccupied = true;
+                                    }
+                                    if (IsOccupied) break;
+                                }
+                                if (IsOccupied) break;
+                            }
+                        } // 네 꼭짓점 중 비어있지 않은 곳이 있다면
+                        else IsOccupied = true;
+                        //만약에 IsOccupied가 false라서 배치가 가능하다면,
+                        if (!IsOccupied)
+                        {
+                            IsLocated = true;
+                            ResultRowCol[0] = row;
+                            ResultRowCol[1] = column;
+                        }
+                        if (IsLocated) break;
+                    }
+                    if (IsLocated) break;
+                }
+            }
 
             return ResultRowCol;
         }
@@ -1622,6 +2212,56 @@ namespace Eoba.Shipyard.ArrangementSimulator.BusinessComponent.Implementation
             }
 
             return CurrentArrangementMatrix;
+        }
+
+
+        // 매트릭스 복사
+        Int32[,] CloneMatrix(Int32[,] ArrangementMatrix)
+        {
+            Int32[,] tempMatrix = new Int32[ArrangementMatrix.GetLength(0), ArrangementMatrix.GetLength(1)];
+
+            for (int i=0; i < ArrangementMatrix.GetLength(0); i++)
+            {
+                for (int j=0; j < ArrangementMatrix.GetLength(1); j++)
+                {
+                    tempMatrix[i, j] = ArrangementMatrix[i, j];
+                }
+            }
+
+            return tempMatrix;
+        }
+
+        // 매트릭스와 블록 위치, 크기, 방향을 입력받았을 때 간섭하는지 체크하는 함수
+        // 간섭 안하면 true, 간섭하면 false 반환
+        bool CheckInterference(Int32[,] CurrentArrangementMatrix, double _RowLocation, double _ColumnLocation, double _BlockRowCount, double _BlockColumnCount, int Orientation)
+        {
+            int RowLocation = Convert.ToInt32(Math.Ceiling(_RowLocation));
+            int ColumnLocation = Convert.ToInt32(Math.Ceiling(_ColumnLocation));
+            int BlockRowCount = 0;
+            int BlockColumnCount = 0;
+            if (Orientation == 0)
+            {
+                BlockRowCount = Convert.ToInt32(Math.Ceiling(_BlockRowCount));
+                BlockColumnCount = Convert.ToInt32(Math.Ceiling(_BlockColumnCount));
+            }
+            else if (Orientation == 1)
+            {
+                BlockRowCount = Convert.ToInt32(Math.Ceiling(_BlockColumnCount));
+                BlockColumnCount = Convert.ToInt32(Math.Ceiling(_BlockRowCount));
+            }
+
+            for (int i = 0; i < BlockRowCount; i++)
+            {
+                for (int j = 0; j < BlockColumnCount; j++)
+                {
+                    if(CurrentArrangementMatrix[RowLocation + i, ColumnLocation + j] != 0)
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+
         }
 
         #endregion
