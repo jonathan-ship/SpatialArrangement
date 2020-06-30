@@ -19,7 +19,7 @@ namespace Eoba.Shipyard.ArrangementSimulator.DataTransferObject
         public int NumOfAddress { get; set; }
 
         public double RowLocation { get; set; }
-        public double ColumnLcoation { get; set; }
+        public double ColumnLocation { get; set; }
         public double[] UpperRoadside { get; set; }
         public double[] BottomRoadside { get; set; }
         public double[] LeftRoadside { get; set; }
@@ -28,6 +28,7 @@ namespace Eoba.Shipyard.ArrangementSimulator.DataTransferObject
 
         public double[] AddressColumnLocation { get; set; }
         public string RoadSide { get; set; }
+        public int Type { get; set; }
 
         public List<int> LocatedBlockIndexList 
         {
@@ -109,7 +110,7 @@ namespace Eoba.Shipyard.ArrangementSimulator.DataTransferObject
             ColumnCount = _colCount;
             NumOfAddress = _numOfAddress;
             RowLocation = _RowLocation;
-            ColumnLcoation = _ColumnLocation;
+            ColumnLocation = _ColumnLocation;
             UpperRoadside = _UpperRoadside;
             BottomRoadside = _BottomRoadside;
             LeftRoadside = _LeftRoadside;
@@ -133,11 +134,12 @@ namespace Eoba.Shipyard.ArrangementSimulator.DataTransferObject
             WorkshopDTO tempWorkshopDTO =  new WorkshopDTO(Index, Name, RowCount, ColumnCount, NumOfAddress);
             if (ArrangementMatrixInfoList.Count != 0) tempWorkshopDTO.ArrangementMatrixInfoList = ArrangementMatrixInfoList;
             tempWorkshopDTO.RowLocation = RowLocation;
-            tempWorkshopDTO.ColumnLcoation = ColumnLcoation;
+            tempWorkshopDTO.ColumnLocation = ColumnLocation;
             tempWorkshopDTO.UpperRoadside = UpperRoadside;
             tempWorkshopDTO.BottomRoadside = BottomRoadside;
             tempWorkshopDTO.LeftRoadside = LeftRoadside;
             tempWorkshopDTO.RightRoadside = RightRoadside;
+            tempWorkshopDTO.Type = Type;
 
             return tempWorkshopDTO;
         }

@@ -46,6 +46,7 @@ namespace Eoba.Shipyard.ArrangementSimulator.MainUI
         int ArrangementAlgorithmMode = 0;//0:BLF, 1:Greedy
         double UnitGridLength = 1;
         double InputSlack = 2;
+        int ExportWorkshopIndex = -1;
 
         OpenFileDialog myOpenFileDialog = new OpenFileDialog();
         SaveFileDialog mySaveFileDialog = new SaveFileDialog();
@@ -128,7 +129,7 @@ namespace Eoba.Shipyard.ArrangementSimulator.MainUI
                 {
                     mWorkshopInfoList.Add(new WorkshopDTO(Convert.ToInt16(input[i][0]), input[i][1], Convert.ToDouble(input[i][2]) / UnitGridLength, Convert.ToDouble(input[i][3]) / UnitGridLength, Convert.ToInt32(input[i][4])));
                     mWorkshopInfoList[mWorkshopInfoList.Count - 1].RowLocation = Convert.ToDouble(input[i][5]) / UnitGridLength;
-                    mWorkshopInfoList[mWorkshopInfoList.Count - 1].ColumnLcoation = Convert.ToDouble(input[i][6]) / UnitGridLength;
+                    mWorkshopInfoList[mWorkshopInfoList.Count - 1].ColumnLocation = Convert.ToDouble(input[i][6]) / UnitGridLength;
 
                     if (input[i][7] != "")
                     {
@@ -158,7 +159,14 @@ namespace Eoba.Shipyard.ArrangementSimulator.MainUI
                         for (int j = 0; j < temp.Length; j++) tempDouble[j] = Convert.ToDouble(temp[j]) / UnitGridLength;
                         mWorkshopInfoList[mWorkshopInfoList.Count - 1].RightRoadside = tempDouble;
                     }
+                    if (input[i][11] == "") mWorkshopInfoList[mWorkshopInfoList.Count - 1].Type = 0;
+                    else mWorkshopInfoList[mWorkshopInfoList.Count - 1].Type = Convert.ToInt32(input[i][11]);
 
+                }
+
+                foreach (WorkshopDTO workshop in mWorkshopInfoList)
+                {
+                    if (workshop.Type == 1) ExportWorkshopIndex = workshop.Index;
                 }
 
                 //그리드에 입력 결과 출력
@@ -604,6 +612,97 @@ namespace Eoba.Shipyard.ArrangementSimulator.MainUI
                 }
             }
         }
+
+        /// <summary>
+        /// 여유 작업 공간을 고려한 BLF 알고리즘 + 우선 배치기능 추가 + 해상크레인 출고장 기능 추가
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        /// 최초 작성 : 유상현, 2020년 06월 29일
+        /// 수정 작성 : 
+        private void bLFWithFlotidsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //mDataManagement.UpdateWorkshopDataOfGrid(grdWorkshopInfo, mWorkshopInfoList);
+            //mDataManagement.UpdateBlockDataOfGrid(grdBlockInfo, mBlockInfoList);
+
+            int Slack = Convert.ToInt32(Math.Ceiling(InputSlack / UnitGridLength));
+
+            if (mBlockInfoList != null)
+            {
+                //모든 블록의 입고/출고 날짜 저장 + 가장 빠른 날짜, 가장 늦은 날짜 계산
+                DateTime[] simDates = new DateTime[2];
+                simDates = mBlockArrangement.CalcEarliestAndLatestDates(mBlockInfoList);
+
+                DateTime startDate = new DateTime();
+                DateTime finishDate = new DateTime();
+
+                //추천된 시뮬레이션 시작일, 종료일을 기준으로 사용자가 UI에서 시작일, 종료일 선택
+                using (var form = new frmArrangementRangeSetting(simDates[0], simDates[1]))
+                {
+                    var result = form.ShowDialog();
+                    if (result == DialogResult.OK)
+                    {
+                        startDate = form.StartDate;
+                        finishDate = form.FinishDate;
+                    }
+                }
+
+                //Chart 초기화(작업장 별 차트 + Tab page)
+                mResultsManagement.InitializeIndividualWorkshopChart(mWorkshopInfoList, mChartList, chtWorkshop1, tabChart);
+
+
+                //Chart 초기화(전체 요약 차트)
+                mResultsManagement.InitializeTotalWorkshopChart(chtTotal);
+
+                try
+                {
+                    Stopwatch sw = new Stopwatch();
+                    sw.Start();
+
+
+                    //입력한 날짜를 기준으로 BLF 알고리즘 시작
+                    mArrangementResultList.Clear();
+                    if (IsWorkshopInfoReady && IsBlockInfoReady)
+                    {
+
+                        // WorkshopMatrix 초기설정 세팅
+                        // Input : 작업장 정보 리스트, 작업장 배치 불가 구역 리스트
+                        // Output : 작업장 매트릭스 리스트  List<Int32[,]> 
+                        List<Int32[,]> ArrangementMatrixList = mBlockArrangement.InitializeArrangementMatrixWithSlack(mWorkshopInfoList, Slack);
+
+                        // RunBLFAlgorithm
+                        // Input : 작업장 정보리스트, 블록정보리스트, 작업장 매트릭스리스트, 시작날짜, 끝 날짜
+                        // Output : Result
+                        mResultInfo = mBlockArrangement.RunBLFAlgorithmWithFloatingCrane(mBlockInfoList, ArrangementMatrixList, mWorkshopInfoList, startDate, finishDate, toolStripProgressBar1, toolStripStatusLabel1, Slack, ExportWorkshopIndex);
+
+
+                        reportRToolStripMenuItem1.Enabled = true;
+                        dViewerVToolStripMenuItem.Enabled = true;
+                        dCumlatedOccupyingVToolStripMenuItem.Enabled = true;
+                    }
+                    else
+                    {
+                        MessageBox.Show("입력 정보가 부족합니다.");
+                    }
+                    sw.Stop();
+
+                    //배치 결과 Chart에 출력
+                    mResultsManagement.DrawChart(mResultInfo, mChartList, chtTotal);
+
+                    //배치 결과 요약 메시지 박스 출력
+                    mResultsManagement.PrintBLFAlgorithmResultsSummary(mResultInfo, sw);
+
+                    //알고리즘 모드 = BLF 알고리즘
+                    ArrangementAlgorithmMode = 0;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString());
+                }
+            }
+        }
+
+
 
         //private void dCumlatedOccupyingVToolStripMenuItem_Click(object sender, EventArgs e)
         //{

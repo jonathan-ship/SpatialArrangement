@@ -189,15 +189,15 @@ namespace Eoba.Shipyard.ArrangementSimulator.ResultsViewer
 
 
             //작업장 원점 좌표
-            List<double[]> ws = new List<double[]>();
-            ws.Add(new double[2] { 135 + 1, 75 });
-            ws.Add(new double[2] { 135 + 1, 450 });
-            ws.Add(new double[2] { 135 + 1, 718 });
-            ws.Add(new double[2] { 0, 0 });
+            //List<double[]> ws = new List<double[]>();
+            //foreach (WorkshopDTO workshop in mWorkshopInfoList)
+            //{
+            //    ws.Add(new double[2] { workshop.RowLocation, workshop.ColumnLocation });
+            //}
 
             
 
-
+            //카메라 초기화를 위한 임시 작업장 생성
             WorkshopDTO tempWorkshopDTO = new WorkshopDTO();
             tempWorkshopDTO.RowCount = 199;
             tempWorkshopDTO.ColumnCount = 809;
@@ -217,17 +217,20 @@ namespace Eoba.Shipyard.ArrangementSimulator.ResultsViewer
 
             DateTime CurrentDate = mResultsInfo.ArrangementStartDate.AddDays(seletedDateIndex);
             ModelVisual3D model1 = new ModelVisual3D();
-
-
             //작업장 가시화
-            main3DGroup.Children.Add(CreateRectModel(mWorkshopInfoList[0].RowCount, mWorkshopInfoList[0].ColumnCount, 0, new Point3D(ws[0][0], ws[0][1], 0), Colors.White));
-            main3DGroup.Children.Add(CreateRectModel(mWorkshopInfoList[1].RowCount, mWorkshopInfoList[1].ColumnCount, 0, new Point3D(ws[1][0], ws[1][1], 0), Colors.White));
-            main3DGroup.Children.Add(CreateRectModel(mWorkshopInfoList[2].RowCount, mWorkshopInfoList[2].ColumnCount, 0, new Point3D(ws[2][0], ws[2][1], 0), Colors.White));
-            main3DGroup.Children.Add(CreateRectModel(mWorkshopInfoList[3].RowCount, mWorkshopInfoList[3].ColumnCount, 0, new Point3D(ws[3][0], ws[3][1], 0), Colors.White));
-            //도크 가시화
-            main3DGroup.Children.Add(CreateRectModel(mWorkshopInfoList[3].RowCount, ws[2][1] - mWorkshopInfoList[3].ColumnCount, 0.000000, new Point3D(0, mWorkshopInfoList[3].ColumnCount, 0), Colors.Gray, 10, new string[4] { "Main Dock", "", "", ""}));
-            //입고장(북) 가시화
-            //main3DGroup.Children.Add(CreateRectModel(mWorkshopInfoList[0].RowCount, ws[1][1] - ws[0][1] - mWorkshopInfoList[0].ColumnCount, 1, new Point3D(ws[0][0], ws[0][1] + mWorkshopInfoList[0].ColumnCount, 0), Colors.Gray));
+            foreach (WorkshopDTO Workshop in mWorkshopInfoList)
+            {
+                if (Workshop.Type != -1) main3DGroup.Children.Add(CreateRectModel(Workshop.RowCount, Workshop.ColumnCount, 0, new Point3D(Workshop.RowLocation, Workshop.ColumnLocation, 0), Colors.White));
+                else main3DGroup.Children.Add(CreateRectModel(Workshop.RowCount, Workshop.ColumnCount, 0, new Point3D(Workshop.RowLocation, Workshop.ColumnLocation, 0), Colors.Gray, 10, new string[4] { Workshop.Name, "", "", "" }));
+            }
+            //main3DGroup.Children.Add(CreateRectModel(mWorkshopInfoList[0].RowCount, mWorkshopInfoList[0].ColumnCount, 0, new Point3D(ws[0][0], ws[0][1], 0), Colors.White));
+            //main3DGroup.Children.Add(CreateRectModel(mWorkshopInfoList[1].RowCount, mWorkshopInfoList[1].ColumnCount, 0, new Point3D(ws[1][0], ws[1][1], 0), Colors.White));
+            //main3DGroup.Children.Add(CreateRectModel(mWorkshopInfoList[2].RowCount, mWorkshopInfoList[2].ColumnCount, 0, new Point3D(ws[2][0], ws[2][1], 0), Colors.White));
+            //main3DGroup.Children.Add(CreateRectModel(mWorkshopInfoList[3].RowCount, mWorkshopInfoList[3].ColumnCount, 0, new Point3D(ws[3][0], ws[3][1], 0), Colors.White));
+            ////도크 가시화
+            //main3DGroup.Children.Add(CreateRectModel(mWorkshopInfoList[3].RowCount, ws[2][1] - mWorkshopInfoList[3].ColumnCount, 0.000000, new Point3D(0, mWorkshopInfoList[3].ColumnCount, 0), Colors.Gray, 10, new string[4] { "Main Dock", "", "", ""}));
+            ////입고장(북) 가시화
+            ////main3DGroup.Children.Add(CreateRectModel(mWorkshopInfoList[0].RowCount, ws[1][1] - ws[0][1] - mWorkshopInfoList[0].ColumnCount, 1, new Point3D(ws[0][0], ws[0][1] + mWorkshopInfoList[0].ColumnCount, 0), Colors.Gray));
 
 
             //배치불가구역 가시화
@@ -235,7 +238,7 @@ namespace Eoba.Shipyard.ArrangementSimulator.ResultsViewer
             {
                 foreach (ArrangementMatrixInfoDTO Object in Workshop.ArrangementMatrixInfoList)
                 {
-                    main3DGroup.Children.Add(CreateRectModel(Math.Ceiling(Object.RowCount), Math.Ceiling(Object.ColumnCount), 0, new Point3D(ws[Workshop.Index][0] + Math.Ceiling(Object.RowLocation), ws[Workshop.Index][1] + Math.Ceiling(Object.ColumnLocation), 0), Colors.LightCyan, 3, new string[4] { "NA", "", "", "" }));
+                    main3DGroup.Children.Add(CreateRectModel(Math.Ceiling(Object.RowCount), Math.Ceiling(Object.ColumnCount), 0, new Point3D(Workshop.RowLocation + Math.Ceiling(Object.RowLocation), Workshop.ColumnLocation + Math.Ceiling(Object.ColumnLocation), 0), Colors.LightCyan, 3, new string[4] { "NA", "", "", "" }));
                 }
             }
 
@@ -286,17 +289,23 @@ namespace Eoba.Shipyard.ArrangementSimulator.ResultsViewer
                 if (ResidualTime == 1) { blockColor = Colors.Yellow; }
                 //blockColor.A = 100;
 
+                DateTime tempdate = Block.InitialExportDate.AddDays(2);
                 string[] arrprintedstring = { Block.Project, "-" + Block.Name, Block.ImportDate.ToShortDateString().Substring(5), Block.ExportDate.ToShortDateString().Substring(5) };
+                if (Block.IsPrior == true & Block.IsFloatingCraneExportBlock == false) arrprintedstring[3] = "aaa";
+                else if (Block.IsFloatingCraneExportBlock == true) arrprintedstring[2] = Block.InitialImportDate.ToShortDateString().Substring(5); arrprintedstring[3] = Block.InitialExportDate.ToShortDateString().Substring(5);
+
                 //블록 위에 출력되는 정보 확인을 위하여 minSize 계산
                 double minSize = Block.RowCount;
                 if (Block.RowCount > Block.ColumnCount) minSize = Block.ColumnCount;
                 minSize = minSize / arrprintedstring[0].Length;
                 if (minSize > 3.0) minSize = 3.0;
 
-                main3DGroup.Children.Add(CreateRectModel(tempRow, tempCol, 0, new Point3D(ws[Block.CurrentLocatedWorkshopIndex][0] + Math.Ceiling(Block.LocatedRow), ws[Block.CurrentLocatedWorkshopIndex][1] + Math.Ceiling(Block.LocatedColumn), 0), blockColor));
+                main3DGroup.Children.Add(CreateRectModel(tempRow, tempCol, 0, new Point3D(mWorkshopInfoList[Block.CurrentLocatedWorkshopIndex].RowLocation + Math.Ceiling(Block.LocatedRow), mWorkshopInfoList[Block.CurrentLocatedWorkshopIndex].ColumnLocation + Math.Ceiling(Block.LocatedColumn), 0), blockColor));
                 //우선순위 블록은 노란색으로 채우기
-                if(Block.IsPrior == true) main3DGroup.Children.Add(CreateRectModel(tempRow - 0.8, tempCol - 0.8, 0, new Point3D(ws[Block.CurrentLocatedWorkshopIndex][0] + Math.Ceiling(Block.LocatedRow) + 0.4, ws[Block.CurrentLocatedWorkshopIndex][1] + Math.Ceiling(Block.LocatedColumn) + 0.4, 0), Colors.Yellow, minSize, arrprintedstring));
-                else main3DGroup.Children.Add(CreateRectModel(tempRow-0.8, tempCol-0.8, 0, new Point3D(ws[Block.CurrentLocatedWorkshopIndex][0] + Math.Ceiling(Block.LocatedRow)+0.4, ws[Block.CurrentLocatedWorkshopIndex][1] + Math.Ceiling(Block.LocatedColumn)+0.4, 0), Colors.Silver, minSize, arrprintedstring));
+                if(Block.IsPrior == true & Block.IsFloatingCraneExportBlock == false) main3DGroup.Children.Add(CreateRectModel(tempRow - 0.8, tempCol - 0.8, 0, new Point3D(mWorkshopInfoList[Block.CurrentLocatedWorkshopIndex].RowLocation + Math.Ceiling(Block.LocatedRow) + 0.4, mWorkshopInfoList[Block.CurrentLocatedWorkshopIndex].ColumnLocation + Math.Ceiling(Block.LocatedColumn) + 0.4, 0), Colors.Yellow, minSize, arrprintedstring));
+                //출고장용 블록
+                else if (Block.IsFloatingCraneExportBlock == true) main3DGroup.Children.Add(CreateRectModel(tempRow - 0.8, tempCol - 0.8, 0, new Point3D(mWorkshopInfoList[Block.CurrentLocatedWorkshopIndex].RowLocation + Math.Ceiling(Block.LocatedRow) + 0.4, mWorkshopInfoList[Block.CurrentLocatedWorkshopIndex].ColumnLocation + Math.Ceiling(Block.LocatedColumn) + 0.4, 0), Colors.Yellow, minSize, arrprintedstring));
+                else main3DGroup.Children.Add(CreateRectModel(tempRow-0.8, tempCol-0.8, 0, new Point3D(mWorkshopInfoList[Block.CurrentLocatedWorkshopIndex].RowLocation + Math.Ceiling(Block.LocatedRow)+0.4, mWorkshopInfoList[Block.CurrentLocatedWorkshopIndex].ColumnLocation + Math.Ceiling(Block.LocatedColumn)+0.4, 0), Colors.Silver, minSize, arrprintedstring));
             }
 
 

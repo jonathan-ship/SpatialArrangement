@@ -24,6 +24,7 @@ namespace Eoba.Shipyard.ArrangementSimulator.BusinessComponent.Interface
         ArrangementResultWithDateDTO RunBLFAlgorithmWithAddress(List<BlockDTO> inputBlockList, List<Int32[,]> ArrangementMatrixList, List<WorkshopDTO> WorkShopInfo, DateTime ArranegementStartDate, DateTime ArrangementFinishDate, ToolStripProgressBar ProgressBar, ToolStripStatusLabel ProgressLabel);
         ArrangementResultWithDateDTO RunBLFAlgorithmWithSlack(List<BlockDTO> inputBlockList, List<Int32[,]> ArrangementMatrixList, List<WorkshopDTO> WorkShopInfo, DateTime ArranegementStartDate, DateTime ArrangementFinishDate, ToolStripProgressBar ProgressBar, ToolStripStatusLabel ProgressLabel, int Slack);
         ArrangementResultWithDateDTO RunBLFAlgorithmWithSlackWithPriority(List<BlockDTO> inputBlockList, List<Int32[,]> ArrangementMatrixList, List<WorkshopDTO> WorkShopInfo, DateTime ArranegementStartDate, DateTime ArrangementFinishDate, ToolStripProgressBar ProgressBar, ToolStripStatusLabel ProgressLabel, int Slack);
+        ArrangementResultWithDateDTO RunBLFAlgorithmWithFloatingCrane(List<BlockDTO> inputBlockList, List<Int32[,]> ArrangementMatrixList, List<WorkshopDTO> WorkShopInfo, DateTime ArranegementStartDate, DateTime ArrangementFinishDate, ToolStripProgressBar ProgressBar, ToolStripStatusLabel ProgressLabel, int Slack, int ExportWorkshopIndex);
 
     }
 }

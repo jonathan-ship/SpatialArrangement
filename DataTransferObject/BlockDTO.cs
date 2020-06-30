@@ -88,6 +88,7 @@ namespace Eoba.Shipyard.ArrangementSimulator.DataTransferObject
         public bool IsConditionSatisfied { get; set; }
         public bool IsFinished { get; set; }
         public bool IsPrior { get; set; }
+        public bool IsFloatingCraneExportBlock { get; set; }
         
         public int SearchDirection { get; set; }
         public int ArrangementDirection { get; set; }
