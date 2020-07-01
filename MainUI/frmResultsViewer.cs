@@ -41,5 +41,10 @@ namespace Eoba.Shipyard.ArrangementSimulator.MainUI
         {
 
         }
+
+        private void elementHost1_ChildChanged_3(object sender, System.Windows.Forms.Integration.ChildChangedEventArgs e)
+        {
+
+        }
     }
 }

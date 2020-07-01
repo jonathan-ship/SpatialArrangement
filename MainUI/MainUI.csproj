@@ -119,6 +119,12 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="frmSetParameter.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmSetParameter.Designer.cs">
+      <DependentUpon>frmSetParameter.cs</DependentUpon>
+    </Compile>
     <Compile Include="frmArrangementPatternLearning.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -151,6 +157,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="frmSetParameter.resx">
+      <DependentUpon>frmSetParameter.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmArrangementPatternLearning.resx">
       <DependentUpon>frmArrangementPatternLearning.cs</DependentUpon>
     </EmbeddedResource>
