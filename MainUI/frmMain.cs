@@ -44,8 +44,8 @@ namespace Eoba.Shipyard.ArrangementSimulator.MainUI
         bool IsBlockInfoReady;
         bool IsPlateInfoReady = false;
         int ArrangementAlgorithmMode = 0;//0:BLF, 1:Greedy
-        double UnitGridLength = 1;
-        double InputSlack = 2;
+        public double UnitGridLength = 1;
+        public double InputSlack = 2;
         int ExportWorkshopIndex = -1;
 
         OpenFileDialog myOpenFileDialog = new OpenFileDialog();
@@ -83,6 +83,8 @@ namespace Eoba.Shipyard.ArrangementSimulator.MainUI
             grdBlockInfo.Columns[12].Name = "선호 작업장";
             grdBlockInfo.Columns[13].Name = "선호 지번";
         }
+
+
 
         /// <summary>
         /// Workshop 정보 읽기 버튼 클릭 이벤트
@@ -689,6 +691,8 @@ namespace Eoba.Shipyard.ArrangementSimulator.MainUI
                     //배치 결과 Chart에 출력
                     mResultsManagement.DrawChart(mResultInfo, mChartList, chtTotal);
 
+
+
                     //배치 결과 요약 메시지 박스 출력
                     mResultsManagement.PrintBLFAlgorithmResultsSummary(mResultInfo, sw);
 
@@ -1142,6 +1146,28 @@ namespace Eoba.Shipyard.ArrangementSimulator.MainUI
 
         }
 
-        
+        private void setParametersToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            frmSetParameter myfrmSetParameter;
+
+            myfrmSetParameter = new frmSetParameter();
+
+            // 2016년 11월 28일 주수헌 수정, BLF, Greedy 모두 날짜 개념이 들어가므로 아래의 구분은 무효
+
+            ////BLF 알고리즘
+            //if (ArrangementAlgorithmMode == 0) myfrmResultsViewer = new frmResultsViewer(mResultInfo, mWorkshopInfoList);
+            ////Greedy 알고리즘
+            //else myfrmResultsViewer = new frmResultsViewer(mBlockInfoList, mWorkshopInfoList, mUnitcellInfoList);
+
+            var SetParamResult = myfrmSetParameter.ShowDialog();
+            if (SetParamResult == DialogResult.OK)
+            {
+                string val = myfrmSetParameter.temp1;
+                if (myfrmSetParameter.temp1 != "") UnitGridLength = Convert.ToDouble(myfrmSetParameter.temp1);
+                if (myfrmSetParameter.temp2 != "") InputSlack = Convert.ToDouble(myfrmSetParameter.temp2) / 2;
+            }
+            int testttttt = 1;
+
+        }
     }
 }

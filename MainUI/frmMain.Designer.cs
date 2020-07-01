@@ -42,6 +42,7 @@
             this.openWorkshopMatrixInformationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openBlockInfomationBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.setParametersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openPlateConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openPlateDateInfomationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.endEToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -49,6 +50,7 @@
             this.bLFAlgorithmBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.bLFWithSlackToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.bLFWithPriorityToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.bLFWithFlotidsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.reportRToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.reportRToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -73,7 +75,6 @@
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.chtWorkshop1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.chtTotal = new System.Windows.Forms.DataVisualization.Charting.Chart();
-            this.bLFWithFlotidsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -130,6 +131,7 @@
             this.openWorkshopMatrixInformationToolStripMenuItem,
             this.openBlockInfomationBToolStripMenuItem,
             this.toolStripSeparator1,
+            this.setParametersToolStripMenuItem,
             this.openPlateConfigToolStripMenuItem,
             this.openPlateDateInfomationToolStripMenuItem,
             this.endEToolStripMenuItem});
@@ -141,47 +143,56 @@
             // openWorkshopInfomationWToolStripMenuItem
             // 
             this.openWorkshopInfomationWToolStripMenuItem.Name = "openWorkshopInfomationWToolStripMenuItem";
-            this.openWorkshopInfomationWToolStripMenuItem.Size = new System.Drawing.Size(266, 22);
+            this.openWorkshopInfomationWToolStripMenuItem.Size = new System.Drawing.Size(274, 22);
             this.openWorkshopInfomationWToolStripMenuItem.Text = "Open Workshop Infomation (&W)";
             this.openWorkshopInfomationWToolStripMenuItem.Click += new System.EventHandler(this.openWorkshopInfomationWToolStripMenuItem_Click);
             // 
             // openWorkshopMatrixInformationToolStripMenuItem
             // 
             this.openWorkshopMatrixInformationToolStripMenuItem.Name = "openWorkshopMatrixInformationToolStripMenuItem";
-            this.openWorkshopMatrixInformationToolStripMenuItem.Size = new System.Drawing.Size(266, 22);
-            this.openWorkshopMatrixInformationToolStripMenuItem.Text = "Open Workshop Matrix Information";
+            this.openWorkshopMatrixInformationToolStripMenuItem.Size = new System.Drawing.Size(274, 22);
+            this.openWorkshopMatrixInformationToolStripMenuItem.Text = "Open Not Available Area Information";
             this.openWorkshopMatrixInformationToolStripMenuItem.Click += new System.EventHandler(this.openWorkshopMatrixInformationToolStripMenuItem_Click);
             // 
             // openBlockInfomationBToolStripMenuItem
             // 
             this.openBlockInfomationBToolStripMenuItem.Name = "openBlockInfomationBToolStripMenuItem";
-            this.openBlockInfomationBToolStripMenuItem.Size = new System.Drawing.Size(266, 22);
+            this.openBlockInfomationBToolStripMenuItem.Size = new System.Drawing.Size(274, 22);
             this.openBlockInfomationBToolStripMenuItem.Text = "Open Block Infomation (&B)";
             this.openBlockInfomationBToolStripMenuItem.Click += new System.EventHandler(this.openBlockInfomationBToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(263, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(271, 6);
+            // 
+            // setParametersToolStripMenuItem
+            // 
+            this.setParametersToolStripMenuItem.Name = "setParametersToolStripMenuItem";
+            this.setParametersToolStripMenuItem.Size = new System.Drawing.Size(274, 22);
+            this.setParametersToolStripMenuItem.Text = "Set Parameter";
+            this.setParametersToolStripMenuItem.Click += new System.EventHandler(this.setParametersToolStripMenuItem_Click);
             // 
             // openPlateConfigToolStripMenuItem
             // 
             this.openPlateConfigToolStripMenuItem.Name = "openPlateConfigToolStripMenuItem";
-            this.openPlateConfigToolStripMenuItem.Size = new System.Drawing.Size(266, 22);
+            this.openPlateConfigToolStripMenuItem.Size = new System.Drawing.Size(274, 22);
             this.openPlateConfigToolStripMenuItem.Text = "Open Plate Config";
+            this.openPlateConfigToolStripMenuItem.Visible = false;
             this.openPlateConfigToolStripMenuItem.Click += new System.EventHandler(this.openPlateConfigToolStripMenuItem_Click);
             // 
             // openPlateDateInfomationToolStripMenuItem
             // 
             this.openPlateDateInfomationToolStripMenuItem.Name = "openPlateDateInfomationToolStripMenuItem";
-            this.openPlateDateInfomationToolStripMenuItem.Size = new System.Drawing.Size(266, 22);
+            this.openPlateDateInfomationToolStripMenuItem.Size = new System.Drawing.Size(274, 22);
             this.openPlateDateInfomationToolStripMenuItem.Text = "Open Plate Date Infomation";
+            this.openPlateDateInfomationToolStripMenuItem.Visible = false;
             this.openPlateDateInfomationToolStripMenuItem.Click += new System.EventHandler(this.openPlateDateInfomationToolStripMenuItem_Click);
             // 
             // endEToolStripMenuItem
             // 
             this.endEToolStripMenuItem.Name = "endEToolStripMenuItem";
-            this.endEToolStripMenuItem.Size = new System.Drawing.Size(266, 22);
+            this.endEToolStripMenuItem.Size = new System.Drawing.Size(274, 22);
             this.endEToolStripMenuItem.Text = "End (&E)";
             this.endEToolStripMenuItem.Click += new System.EventHandler(this.endEToolStripMenuItem_Click);
             // 
@@ -218,6 +229,13 @@
             this.bLFWithPriorityToolStripMenuItem.Text = "BLF with Priority";
             this.bLFWithPriorityToolStripMenuItem.Click += new System.EventHandler(this.bLFWithPriorityToolStripMenuItem_Click);
             // 
+            // bLFWithFlotidsToolStripMenuItem
+            // 
+            this.bLFWithFlotidsToolStripMenuItem.Name = "bLFWithFlotidsToolStripMenuItem";
+            this.bLFWithFlotidsToolStripMenuItem.Size = new System.Drawing.Size(202, 22);
+            this.bLFWithFlotidsToolStripMenuItem.Text = "BLF with Floating Crane";
+            this.bLFWithFlotidsToolStripMenuItem.Click += new System.EventHandler(this.bLFWithFlotidsToolStripMenuItem_Click);
+            // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
@@ -238,7 +256,7 @@
             // 
             this.reportRToolStripMenuItem1.Enabled = false;
             this.reportRToolStripMenuItem1.Name = "reportRToolStripMenuItem1";
-            this.reportRToolStripMenuItem1.Size = new System.Drawing.Size(150, 22);
+            this.reportRToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
             this.reportRToolStripMenuItem1.Text = "Report (&R)";
             this.reportRToolStripMenuItem1.Click += new System.EventHandler(this.reportRToolStripMenuItem1_Click);
             // 
@@ -246,14 +264,14 @@
             // 
             this.dViewerVToolStripMenuItem.Enabled = false;
             this.dViewerVToolStripMenuItem.Name = "dViewerVToolStripMenuItem";
-            this.dViewerVToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
+            this.dViewerVToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.dViewerVToolStripMenuItem.Text = "3D Viewer (&V)";
             this.dViewerVToolStripMenuItem.Click += new System.EventHandler(this.dViewerVToolStripMenuItem_Click);
             // 
             // dCumlatedOccupyingVToolStripMenuItem
             // 
             this.dCumlatedOccupyingVToolStripMenuItem.Name = "dCumlatedOccupyingVToolStripMenuItem";
-            this.dCumlatedOccupyingVToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
+            this.dCumlatedOccupyingVToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             // 
             // clearCToolStripMenuItem
             // 
@@ -480,13 +498,6 @@
             this.chtTotal.Text = "chart2";
             this.chtTotal.Click += new System.EventHandler(this.chtTotal_Click);
             // 
-            // bLFWithFlotidsToolStripMenuItem
-            // 
-            this.bLFWithFlotidsToolStripMenuItem.Name = "bLFWithFlotidsToolStripMenuItem";
-            this.bLFWithFlotidsToolStripMenuItem.Size = new System.Drawing.Size(202, 22);
-            this.bLFWithFlotidsToolStripMenuItem.Text = "BLF with Floating Crane";
-            this.bLFWithFlotidsToolStripMenuItem.Click += new System.EventHandler(this.bLFWithFlotidsToolStripMenuItem_Click);
-            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
@@ -564,5 +575,6 @@
         private System.Windows.Forms.ToolStripMenuItem bLFWithSlackToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem bLFWithPriorityToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem bLFWithFlotidsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem setParametersToolStripMenuItem;
     }
 }

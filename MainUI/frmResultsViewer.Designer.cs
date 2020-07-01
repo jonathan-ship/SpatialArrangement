@@ -102,7 +102,7 @@ namespace Eoba.Shipyard.ArrangementSimulator.MainUI
             this.elementHost1.Size = new System.Drawing.Size(1594, 871);
             this.elementHost1.TabIndex = 0;
             this.elementHost1.Text = "elementHost1";
-            this.elementHost1.ChildChanged += new System.EventHandler<System.Windows.Forms.Integration.ChildChangedEventArgs>(this.elementHost1_ChildChanged_2);
+            this.elementHost1.ChildChanged += new System.EventHandler<System.Windows.Forms.Integration.ChildChangedEventArgs>(this.elementHost1_ChildChanged_3);
             this.elementHost1.Child = this.viewer1;
             // 
             // frmResultsViewer
