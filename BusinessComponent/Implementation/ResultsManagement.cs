@@ -260,72 +260,101 @@ namespace Eoba.Shipyard.ArrangementSimulator.BusinessComponent.Implementation
 
         /// <summary>
         /// 각 작업장의 날짜별 배치 블록 현황을 출력하는 함수(csv 파일 생성)
+        /// 2020 수정 -> 각 블록 별 확정된 배치 좌표 및 실제 입출고 일자를 출력하는 함수
         /// </summary>
         /// <param name="_resultInfo">블록 배치 결과</param>
         /// <param name="_fileName">생성할 파일 경로 및 이름</param>
         /// <remarks>
         /// 최초 구현 : 주수헌, 2015년 9월 16일
-        /// 최종 수정 : 정용국, 2016년 01월 20일
+        /// 최종 수정 : 유상현, 2020년 07월 05일
         /// </remarks>
         void IResultsManagement.PrintArrangementResult(ArrangementResultWithDateDTO _resultInfo, string _fileName)
         {
-            //작업장 갯수 만큼 반복하여 파일 생성
-            for (int workshopindex = 0; workshopindex < _resultInfo.ResultWorkShopInfo[0].Count; workshopindex++)
+            FileStream fs = new FileStream(_fileName + ".csv", System.IO.FileMode.Create, System.IO.FileAccess.Write);
+            StreamWriter sw = new StreamWriter(fs, System.Text.Encoding.Default);
+
+            //열 이름 설정
+            string FirstRow = "PROJECTNO,Block No.,Initial Import Date,Initial Export Date,Actual Import Date,Actual Export Date,Delayed Days,Workshop Index,Located Row,Located Column";
+            sw.WriteLine(FirstRow);
+
+            foreach (BlockDTO Block in _resultInfo.BlockResultList)
             {
-                FileStream fs = new FileStream(_fileName + "_" + _resultInfo.ResultWorkShopInfo[0][workshopindex].Name + ".csv", System.IO.FileMode.Create, System.IO.FileAccess.Write);
-                StreamWriter sw = new StreamWriter(fs, System.Text.Encoding.Default);
-
-                //열 이름 설정
-                string FirstRow = "Date,Area Utilization,# of Blocks,Block name";
-                sw.WriteLine(FirstRow);
-
-                //날짜별 배치 정보에서 해당 작업장에 배치된 블록 검색
-                List<List<BlockDTO>> tempTotalDailyBlockList = new List<List<BlockDTO>>();
-
-                for (int i = 0; i < _resultInfo.TotalDailyArragnementedBlockList.Count; i++)
-                {
-                    List<BlockDTO> tempTodayBlockList = new List<BlockDTO>();
-
-                    for (int j = 0; j < _resultInfo.TotalDailyArragnementedBlockList[i].Count; j++)
-                    {
-                        if (_resultInfo.ResultWorkShopInfo[0][workshopindex].Index == _resultInfo.TotalDailyArragnementedBlockList[i][j].CurrentLocatedWorkshopIndex)
-                        {
-                            tempTodayBlockList.Add(_resultInfo.TotalDailyArragnementedBlockList[i][j]);
-                        }
-                    }
-                    tempTotalDailyBlockList.Add(tempTodayBlockList);
-                }
-
-                //날짜별 점유 블록 정보 입력
-                DateTime CurrentDate = _resultInfo.ArrangementStartDate;
-
-                for (int i = 0; i < _resultInfo.TotalDailyArragnementedBlockList.Count; i++)
-                {
-                    string tempRowstring = "";
-                    tempRowstring = CurrentDate.ToShortDateString();
-                    tempRowstring = tempRowstring + "," + _resultInfo.ResultWorkShopInfo[i][workshopindex].AreaUtilization;
-                    tempRowstring = tempRowstring + "," + _resultInfo.ResultWorkShopInfo[i][workshopindex].NumOfLocatedBlocks;
-                    string LocatedBlockName = "";
-
-                    for (int j = 0; j < tempTotalDailyBlockList[i].Count; j++)
-                    {
-                        if (j == 0)
-                        {
-                            LocatedBlockName = "(" + tempTotalDailyBlockList[i][j].Project + ")" + tempTotalDailyBlockList[i][j].Name;
-                        }
-                        else
-                        {
-                            LocatedBlockName = LocatedBlockName + "," + "(" + tempTotalDailyBlockList[i][j].Project + ")" + tempTotalDailyBlockList[i][j].Name;
-                        }
-                    }
-
-                    tempRowstring = tempRowstring + "," + LocatedBlockName;
-                    sw.WriteLine(tempRowstring);
-                    CurrentDate = CurrentDate.AddDays(1);
-                }
-                sw.Close();
-                fs.Close();
+                string tempRowstring = "";
+                tempRowstring += Block.Project;
+                tempRowstring += "," + Block.Name;
+                tempRowstring += "," + Block.InitialImportDate.ToShortDateString();
+                tempRowstring += "," + Block.InitialExportDate.ToShortDateString();
+                tempRowstring += "," + Block.ActualImportDate.ToShortDateString();
+                tempRowstring += "," + Block.ActualExportDate.ToShortDateString();
+                if (Block.InitialImportDate == Block.ActualImportDate) tempRowstring += "," + "0";
+                else tempRowstring += "," + Convert.ToString((Block.ActualImportDate - Block.InitialImportDate).Days);
+                tempRowstring += "," + Convert.ToString(Block.CurrentLocatedWorkshopIndex);
+                tempRowstring += "," + Convert.ToString(Block.LocatedRow);
+                tempRowstring += "," + Convert.ToString(Block.LocatedColumn);
+                sw.WriteLine(tempRowstring);
             }
+            sw.Close();
+            fs.Close();
+
+            #region 이전 버전
+            //작업장 갯수 만큼 반복하여 파일 생성
+            //for (int workshopindex = 0; workshopindex < _resultInfo.ResultWorkShopInfo[0].Count; workshopindex++)
+            //{
+            //    FileStream fs = new FileStream(_fileName + "_" + _resultInfo.ResultWorkShopInfo[0][workshopindex].Name + ".csv", System.IO.FileMode.Create, System.IO.FileAccess.Write);
+            //    StreamWriter sw = new StreamWriter(fs, System.Text.Encoding.Default);
+
+            //    //열 이름 설정
+            //    string FirstRow = "Date,Area Utilization,# of Blocks,Block name";
+            //    sw.WriteLine(FirstRow);
+
+            //    //날짜별 배치 정보에서 해당 작업장에 배치된 블록 검색
+            //    List<List<BlockDTO>> tempTotalDailyBlockList = new List<List<BlockDTO>>();
+
+            //    for (int i = 0; i < _resultInfo.TotalDailyArragnementedBlockList.Count; i++)
+            //    {
+            //        List<BlockDTO> tempTodayBlockList = new List<BlockDTO>();
+
+            //        for (int j = 0; j < _resultInfo.TotalDailyArragnementedBlockList[i].Count; j++)
+            //        {
+            //            if (_resultInfo.ResultWorkShopInfo[0][workshopindex].Index == _resultInfo.TotalDailyArragnementedBlockList[i][j].CurrentLocatedWorkshopIndex)
+            //            {
+            //                tempTodayBlockList.Add(_resultInfo.TotalDailyArragnementedBlockList[i][j]);
+            //            }
+            //        }
+            //        tempTotalDailyBlockList.Add(tempTodayBlockList);
+            //    }
+
+            //    //날짜별 점유 블록 정보 입력
+            //    DateTime CurrentDate = _resultInfo.ArrangementStartDate;
+
+            //    for (int i = 0; i < _resultInfo.TotalDailyArragnementedBlockList.Count; i++)
+            //    {
+            //        string tempRowstring = "";
+            //        tempRowstring = CurrentDate.ToShortDateString();
+            //        tempRowstring = tempRowstring + "," + _resultInfo.ResultWorkShopInfo[i][workshopindex].AreaUtilization;
+            //        tempRowstring = tempRowstring + "," + _resultInfo.ResultWorkShopInfo[i][workshopindex].NumOfLocatedBlocks;
+            //        string LocatedBlockName = "";
+
+            //        for (int j = 0; j < tempTotalDailyBlockList[i].Count; j++)
+            //        {
+            //            if (j == 0)
+            //            {
+            //                LocatedBlockName = "(" + tempTotalDailyBlockList[i][j].Project + ")" + tempTotalDailyBlockList[i][j].Name;
+            //            }
+            //            else
+            //            {
+            //                LocatedBlockName = LocatedBlockName + "," + "(" + tempTotalDailyBlockList[i][j].Project + ")" + tempTotalDailyBlockList[i][j].Name;
+            //            }
+            //        }
+
+            //        tempRowstring = tempRowstring + "," + LocatedBlockName;
+            //        sw.WriteLine(tempRowstring);
+            //        CurrentDate = CurrentDate.AddDays(1);
+            //    }
+            //    sw.Close();
+            //    fs.Close();
+            //}
+            #endregion
         }
 
         /// <summary>

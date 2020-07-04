@@ -610,6 +610,7 @@ namespace Eoba.Shipyard.ArrangementSimulator.BusinessComponent.Implementation
                     temp.IsRoadSide = CurrentArrangementedBlockList[i].IsRoadSide;
                     temp.IsConditionSatisfied = CurrentArrangementedBlockList[i].IsConditionSatisfied;
                     temp.IsDelayed = CurrentArrangementedBlockList[i].IsDelayed;
+                    temp.DelayedTime = CurrentArrangementedBlockList[i].DelayedTime;
                     tempBlockList.Add(temp);
                 }
 
@@ -823,6 +824,7 @@ namespace Eoba.Shipyard.ArrangementSimulator.BusinessComponent.Implementation
                     temp.IsRoadSide = CurrentArrangementedBlockList[i].IsRoadSide;
                     temp.IsConditionSatisfied = CurrentArrangementedBlockList[i].IsConditionSatisfied;
                     temp.IsDelayed = CurrentArrangementedBlockList[i].IsDelayed;
+                    temp.DelayedTime = CurrentArrangementedBlockList[i].DelayedTime;
 
                     //여유공간 다시 빼줌
                     temp.RowCount -= Slack * 2 + temp.UpperSideCount + temp.BottomSideCount;
@@ -1256,6 +1258,7 @@ namespace Eoba.Shipyard.ArrangementSimulator.BusinessComponent.Implementation
                     temp.IsRoadSide = CurrentArrangementedBlockList[i].IsRoadSide;
                     temp.IsConditionSatisfied = CurrentArrangementedBlockList[i].IsConditionSatisfied;
                     temp.IsDelayed = CurrentArrangementedBlockList[i].IsDelayed;
+                    temp.DelayedTime = CurrentArrangementedBlockList[i].DelayedTime;
 
                     //여유공간 다시 빼줌
                     temp.RowCount -= Slack * 2 + temp.UpperSideCount + temp.BottomSideCount;
@@ -1868,6 +1871,7 @@ namespace Eoba.Shipyard.ArrangementSimulator.BusinessComponent.Implementation
                     temp.IsRoadSide = CurrentArrangementedBlockList[i].IsRoadSide;
                     temp.IsConditionSatisfied = CurrentArrangementedBlockList[i].IsConditionSatisfied;
                     temp.IsDelayed = CurrentArrangementedBlockList[i].IsDelayed;
+                    temp.DelayedTime = CurrentArrangementedBlockList[i].DelayedTime;
 
                     //여유공간 다시 빼줌
                     temp.RowCount -= Slack * 2 + temp.UpperSideCount + temp.BottomSideCount;
